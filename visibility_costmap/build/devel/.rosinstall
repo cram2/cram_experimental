@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/gaya/workspace/rosbuild/cram_physics/visibility_costmap/build/devel/setup.sh
