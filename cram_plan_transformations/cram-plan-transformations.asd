@@ -11,11 +11,14 @@
                cram-plan-library
                cram-plan-knowledge
                cram-utilities
-               alexandria)
+               alexandria
+               cram-json-prolog
+               json_prolog_msgs-srv
+               roslisp-utilities)
   :components
   ((:module "src"
            :components
            ((:file "package")
-            (:file "parse-nl" :depends-on ("package"))))))
+            (:file "parse-nl" :depends-on ("package"))
+            (:file "query-mongodb" :depends-on ("package"))))))
 
-  

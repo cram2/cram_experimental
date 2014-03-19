@@ -199,3 +199,20 @@ isA(spatula.n.01_senseID, spatula.n.01)
           (with-designators
               ((flip-action (action appended-description)))
             (perform flip-action)))))))
+
+
+;; the action designator to pass to Georg
+
+(action `((type constraints)
+          (to flip)
+          (object-acted-with ,spatula)
+          (object-acted-on ,pancake)
+          (constraints
+            ((constraint
+               (relation ((tool-feature ,spatula-center)
+                          (object-feature ,oven-center)
+                          (function 'cl-feature-constraints:height)
+                          (reference "torso-lift-link")))
+               (range ((lower 0.2)
+                       (upper 0.22)))
+               (timing (before motion:'PancakeFlipping_23ze8435')))))))
