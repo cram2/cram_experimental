@@ -1,0 +1,10 @@
+<stack>
+  <description brief="cram_experimental">cram_experimental</description>
+  <author></author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://github.com/cram-code/cram_experimental</url>
+  <depend stack="ros" />
+  <depend stack="roslisp" /> <!-- roslisp -->
+  <depend stack="roslisp_common" /> <!-- cl_transforms, cl_tf -->
+</stack>
