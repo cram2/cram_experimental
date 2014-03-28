@@ -12,13 +12,18 @@
                cram-plan-knowledge
                cram-utilities
                alexandria
+               split-sequence
                cram-json-prolog
                json_prolog_msgs-srv
+               rosprac-srv
+               rosmln-srv
                roslisp-utilities)
   :components
   ((:module "src"
            :components
            ((:file "package")
             (:file "parse-nl" :depends-on ("package"))
-            (:file "query-mongodb" :depends-on ("package"))))))
+            (:file "query-mongodb" :depends-on ("package"))
+            (:file "query-prac" :depends-on ("package"))
+            (:file "main" :depends-on ("package"))))))
 

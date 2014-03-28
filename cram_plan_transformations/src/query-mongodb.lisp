@@ -1,11 +1,5 @@
 
-;; Andrei's IP: 192.168.100.65
-
 (in-package :cram-plan-transformations)
-
-(defun init ()
-  (unless (eq roslisp::*node-status* :running)
-    (roslisp-utilities:startup-ros :anonymous nil)))
 
 (defun test-query ()
   (force-ll
@@ -23,6 +17,7 @@
         `(and ("get_model_pose" ,collection-id "pancake_maker" 0 ?pancake_maker_pose)
               ("get_model_bb" ,collection-id "pancake_maker" 0 ?pancake_maker_bb)
               ;; ("occurs" "flipping" '("during" ?start_time ?end_time))
+              ;; ("lost_spatula_contact_pancake" 2 ?time)
               ("=" ?end_time ,(cond ((= collection-id 1) 33370000000)
                                     ((= collection-id 2) 23338000000)
                                     ((= collection-id 3) 38742000000)
