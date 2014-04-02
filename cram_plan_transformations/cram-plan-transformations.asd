@@ -22,8 +22,8 @@
   ((:module "src"
            :components
            ((:file "package")
-            (:file "parse-nl" :depends-on ("package"))
+            (:file "utilities" :depends-on ("package"))
+            (:file "prolog" :depends-on ("package"))
             (:file "query-mongodb" :depends-on ("package"))
-            (:file "query-prac" :depends-on ("package"))
-            (:file "main" :depends-on ("package"))))))
+            (:file "query-prac" :depends-on ("package"))))))
 

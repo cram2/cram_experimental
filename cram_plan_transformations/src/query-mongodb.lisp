@@ -59,6 +59,7 @@
 
 (defun get-spatula-height ()
   (init)
+  (setf json-prolog::*service-namespace* "/game_log_server")
   (let* ((collections (alexandria:iota 5 :start 1))
          (heights (mapcar 'get-spatula-height-in-collection collections))
          (sum (reduce '+ heights))

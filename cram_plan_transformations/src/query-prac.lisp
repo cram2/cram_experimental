@@ -22,6 +22,7 @@
             (rosprac-srv:output_dbs
              (roslisp:call-service
               "/PRACInfer" 'rosprac-srv:pracinfer
+              :params "missing=True"
               :pracmodule "senses_and_roles"
               :input_dbs (make-array 1 :initial-contents (list mln-database-input))))
             0))
@@ -114,4 +115,5 @@
          (output-assertions-tree
            (mapcar #'function-notation-string->prefix-notation-list
                    only-1-probability-strings-list)))
+    (format t "~%~%daniel says: ~%~a~%~%" output-assertions-tree)
     output-assertions-tree))
