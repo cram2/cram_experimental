@@ -1,3 +1,4 @@
+
 ;; TODO: fix the bsd macro snippet thing
 
 (defsystem cram-plan-transformations
@@ -24,6 +25,7 @@
            ((:file "package")
             (:file "utilities" :depends-on ("package"))
             (:file "prolog" :depends-on ("package"))
-            (:file "query-mongodb" :depends-on ("package"))
-            (:file "query-prac" :depends-on ("package"))))))
+            (:file "query-game-log" :depends-on ("package"))
+            (:file "query-prac" :depends-on ("package"))
+            (:file "demo" :depends-on ("package"))))))
 

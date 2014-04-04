@@ -1,7 +1,7 @@
 
 (in-package :cram-plan-transformations)
 
-(defun query-prac (atom-string-probability-pairs-list)
+(defun prac-call-service (atom-probability-pairs-list)
   (roslisp:wait-for-service "/PRACInfer" 1)
   (let* ((atom-probability-message-list
            (mapcar #'(lambda (atom-probability-pair)
@@ -9,7 +9,7 @@
                         "rosmln/AtomProbPair"
                         :atom (first atom-probability-pair)
                         :prob (second atom-probability-pair)))
-                   atom-string-probability-pairs-list))
+                   atom-probability-pairs-list))
          (mln-database-input
            (roslisp:make-msg
             "rosmln/MLNDatabase"
@@ -17,7 +17,6 @@
                        (length atom-probability-message-list)
                        :initial-contents atom-probability-message-list)))
          (mln-database-output-message
-           ;;rosprac-srv:output_dbs
            (aref
             (rosprac-srv:output_dbs
              (roslisp:call-service
@@ -31,9 +30,11 @@
                           (list (rosmln-msg:atom atomprobpair-message)
                                 (rosmln-msg:prob atomprobpair-message)))
                 (rosmln-msg:evidence mln-database-output-message))))
+    ;; (format t "Asked PRAC: missing roles with:~%~a~%" atom-probability-pairs-list)
+    ;; (format t "PRAC answered:~%~a~%" atom-probability-pairs-output-list)
     atom-probability-pairs-output-list))
 
-(defun test-query-prac-c-style ()
+(defun test-prac-call-service ()
   (let ((atom-prob-pairs '(("action_role(Flip-1, ActionVerb)" 1.0)
                            ("action_role(pancake-3, Theme)" 1.0)
                            ("has_sense(Flip-1, flip-1-8)" 1.0)
@@ -43,27 +44,7 @@
                            ("!is_a(pancake-3-1, flip.v.08)" 1.0)
                            ("has_sense(pancake-3, pancake-3-1)" 1.0)
                            ("action_core(Flip-1, Flipping)" 1.0))))
-    (query-prac atom-prob-pairs)))
-
-(defun query-prac-with-atom-prob-pairs
-    (&optional (atom-prob-pairs '(("action_role(Flip-1, ActionVerb)" 1.0)
-                                  ("action_role(pancake-3, Theme)" 1.0)
-                                  ("has_sense(Flip-1, flip-1-8)" 1.0)
-                                  ("is_a(flip-1-8, flip.v.08)" 1.0)
-                                  ("!is_a(flip-1-8, pancake.n.01)" 1.0)
-                                  ("is_a(pancake-3-1, pancake.n.01)" 1.0)
-                                  ("!is_a(pancake-3-1, flip.v.08)" 1.0)
-                                  ("has_sense(pancake-3, pancake-3-1)" 1.0)
-                                  ("action_core(Flip-1, Flipping)" 1.0))))
-  (let* ((only-1-prob-list
-           (mapcar #'(lambda (string-number-pair)
-                       (unless (< (second string-number-pair) 1.0)
-                         (car string-number-pair)))
-                      atom-prob-pairs))
-         (assertions-tree
-           (mapcar #'function-notation-string->prefix-notation-list
-                   only-1-prob-list)))
-    (get-all-known-roles-p-list assertions-tree)))
+    (prac-call-service atom-prob-pairs)))
 
 (defun prefix-notation-list->function-notation-string (prefixed-list)
   (labels ((accumulate (strings-list concatenated-string)
@@ -101,19 +82,43 @@
                              :remove-empty-subseqs t))))
     (append (list function-name) arguments)))
 
-(defun get-all-known-roles-p-list (assertions-tree)
+(defun extract-1-probability-atoms (atom-probability-pairs)
+  (mapcar #'car (remove-if #'(lambda (string-number-pair)
+                               (< (cadr string-number-pair) 1.0))
+                           atom-probability-pairs)))
+
+(defun prac-get-all-known-roles (atoms-nested-list)
   (let* ((strings-list
-           (mapcar #'prefix-notation-list->function-notation-string assertions-tree))
+           (mapcar #'prefix-notation-list->function-notation-string atoms-nested-list))
          (string-number-pairs-list
            (mapcar #'(lambda (a-string) (list a-string 1.0)) strings-list))
          (string-number-pairs-output-list
-           (query-prac string-number-pairs-list))
+           (prac-call-service string-number-pairs-list))
          (only-1-probability-strings-list
-           (mapcar #'car (remove-if #'(lambda (string-number-pair)
-                                        (< (cadr string-number-pair) 1.0))
-                                    string-number-pairs-output-list)))
-         (output-assertions-tree
+           (extract-1-probability-atoms string-number-pairs-output-list))
+         (output-atoms-nested-list
            (mapcar #'function-notation-string->prefix-notation-list
                    only-1-probability-strings-list)))
-    (format t "~%~%daniel says: ~%~a~%~%" output-assertions-tree)
-    output-assertions-tree))
+    output-atoms-nested-list))
+
+
+(defun prac-nl->atom-nested-list (nl-sentence)
+  (let ((atom-prob-pairs
+          (cond ((equal nl-sentence "Flip the pancake.")
+                 `(("action_role(Flip-1, ActionVerb)" 1.0)
+                   ("action_role(pancake-3, Theme)" 1.0)
+                   ("has_sense(Flip-1, flip-1-8)" 1.0)
+                   ("is_a(flip-1-8, flip.v.08)" 1.0)
+                   ("!is_a(flip-1-8, pancake.n.01)" 1.0)
+                   ("is_a(pancake-3-1, pancake.n.01)" 1.0)
+                   ("!is_a(pancake-3-1, flip.v.08)" 1.0)
+                   ("has_sense(pancake-3, pancake-3-1)" 1.0)
+                   ("action_core(Flip-1, Flipping)" 1.0)))
+                (t (ros-error (query-prac)
+                              "Parsing natural language sentences is not supported yet")))))
+    (atom-prob-pairs->nested-list atom-prob-pairs)))
+
+(defun atom-prob-pairs->nested-list (atom-prob-pairs)
+  (let ((only-1-prob-list (extract-1-probability-atoms atom-prob-pairs)))
+    (mapcar #'function-notation-string->prefix-notation-list
+                   only-1-prob-list)))
