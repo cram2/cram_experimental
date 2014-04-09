@@ -23,6 +23,7 @@
                                     ,action-plist ?action-description)))))
     (format t "Action raw data:~%~a~%~%" action-plist)
     (format t "Action description:~%~a~%~%" action-description)
+    (format t "*****************************************~%~%")
 
     (break)
 
@@ -37,6 +38,7 @@
                                     ,additional-plist ?additional-description)))))
     (format t "Missing roles raw data:~%~a~%~%" additional-plist)
     (format t "Missing roles description:~%~a~%~%" additional-description)
+    (format t "*****************************************~%~%")
 
     (break)
 
@@ -47,6 +49,7 @@
                                     ,action-description ,additional-plist
                                     ?new-description)))))
     (format t "Combined description:~%~a~%~%" combined-description)
+    (format t "*****************************************~%~%")
 
     (break)
 

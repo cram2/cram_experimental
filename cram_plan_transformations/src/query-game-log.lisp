@@ -64,15 +64,11 @@
 (defun get-spatula-height ()
   (init)
   (setf json-prolog::*service-namespace* "/game_log_server")
-  (handler-case
-      (let* ((collections (alexandria:iota 5 :start 1))
+  (let* ((collections (alexandria:iota 5 :start 1))
              (heights (mapcar 'get-spatula-height-in-collection collections))
              (sum (reduce '+ heights))
              (avg (/ sum (length collections))))
-        avg)
-    (condition (e)
-      (push e *errors*)
-      2.71d0)))
+        avg))
 
 (defun game-log-param-value (param)
   (cond ((eq param 'instrument-relative-height)
