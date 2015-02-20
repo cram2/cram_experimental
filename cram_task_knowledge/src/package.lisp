@@ -40,5 +40,5 @@
            situation?
            meal-time)
   (:import-from :cram-reasoning def-fact-group <-)
-  (:import-from cram-roslisp-common *tf2*)
+  (:import-from cram-roslisp-common *tf2-buffer*)
   (:desig-properties type situation meal-time breakfast lunch dinner))
