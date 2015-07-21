@@ -31,7 +31,7 @@
   :description "Package that generates costmaps from currently (in)visible regions and occlusions."
 
   :depends-on (roslisp
-               designators-ros
+               cram-transforms-stamped
                cram-roslisp-common
                cram-language
                semantic-map-costmap

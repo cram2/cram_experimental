@@ -36,7 +36,7 @@
         #:crs
         #:cut
         #:desig
-        #:designators-ros
+        #:cram-transforms-stamped
         #:cljlo-utils
         #:roslisp
         #:cram-plan-failures

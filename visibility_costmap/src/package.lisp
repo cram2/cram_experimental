@@ -29,7 +29,7 @@
 
 (desig-props:def-desig-package visibility-costmap
   (:use #:common-lisp #:crs #:location-costmap
-        #:designators-ros #:cram-roslisp-common
+        #:cram-transforms-stamped #:cram-roslisp-common
         #:desig)
   (:import-from #:cram-reasoning #:<- #:def-fact-group)
   (:desig-properties #:invisible-from #:visible-from

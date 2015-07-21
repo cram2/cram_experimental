@@ -40,7 +40,7 @@
                cram-plan-knowledge
                cram-manipulation-knowledge
                designators
-               designators-ros
+               cram-transforms-stamped
                cljlo
                cljlo-utils
                actionlib
