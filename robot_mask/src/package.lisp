@@ -31,5 +31,5 @@
 (in-package :cl-user)
 
 (defpackage robot-mask
-    (:use #:common-lisp #:bullet-reasoning #:roslisp)
+    (:use #:common-lisp #:cram-bullet-reasoning #:roslisp)
   (:export main))

@@ -32,7 +32,7 @@
     :author "Lorenz Moesenlechner"
     :license "BSD"
     
-    :depends-on (bullet-reasoning cl-bullet-vis robot_mask-srv)
+    :depends-on (cram-bullet-reasoning cl-bullet-vis robot_mask-srv)
     :components
     ((:module "src"
               :components

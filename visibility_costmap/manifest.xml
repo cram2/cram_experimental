@@ -10,11 +10,10 @@
   <url>http://ros.org/wiki/visibility_costmap</url>
   
   <depend package="roslisp"/>
-  <depend package="bullet_reasoning"/>
+  <depend package="cram_bullet_reasoning"/>
   <depend package="cram_language" />
   <depend package="cram_roslisp_common" />
   <depend package="cram_transforms_stamped" />
-  <depend package="bullet_reasoning" />
   <depend package="semantic_map_costmap" />
 
 </package>

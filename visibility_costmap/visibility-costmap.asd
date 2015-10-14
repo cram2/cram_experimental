@@ -35,7 +35,7 @@
                cram-roslisp-common
                cram-language
                semantic-map-costmap
-               bullet-reasoning)
+               cram-bullet-reasoning)
   :components
   ((:module "src"
     :components

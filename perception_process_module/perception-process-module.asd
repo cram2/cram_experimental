@@ -38,7 +38,7 @@
                process-modules
                cram-utilities
                cram-plan-knowledge
-               cram-manipulation-knowledge
+               cram-robot-interfaces
                designators
                cram-transforms-stamped
                cljlo
@@ -54,7 +54,7 @@
                cl-semantic-map-utils
                handle_detection-msg
                ias_perception_actions-msg
-               bullet-reasoning)
+               cram-bullet-reasoning)
   :components
   ((:module "src"
             :components
