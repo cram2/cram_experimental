@@ -31,12 +31,11 @@
   :description "Task Specific Knowledge Supporting CRAM High Level Plans"
   
   :depends-on (cram-language
-               cram-reasoning
-               designators
+               cram-prolog
+               cram-designators
 	       cram-language-designator-support
-               cram-roslisp-common
+               cram-transforms-stamped
                cram-utilities
-               designators-ros
                alexandria)
   :components
   ((:module "src"
