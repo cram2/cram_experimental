@@ -30,8 +30,8 @@
 
 (desig-props:def-desig-package continuous-interaction
   (:nicknames continuous)
-  (:use #:common-lisp #:roslisp #:cram-utilities #:designators-ros
-        #:cram-roslisp-common #:cram-designators
+  (:use #:common-lisp #:roslisp #:cram-utilities
+        #:cram-transforms-stamped #:cram-designators
         #:cram-plan-knowledge #:cram-plan-library)
   (:import-from :cram-language
                 top-level fl-funcall with-tags pursue tag retry-after-suspension
