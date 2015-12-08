@@ -32,19 +32,19 @@
   :license "BSD"
   :description "Perception process module"
 
-  :depends-on (cram-roslisp-common
+  :depends-on (
                cram-language
-               cram-reasoning
+               cram-prolog
                process-modules
                cram-utilities
-               cram-plan-knowledge
+               cram-ocassions-events
                cram-robot-interfaces
-               designators
+               cram-designators
                cram-transforms-stamped
                cljlo
                cljlo-utils
                actionlib
-               semantic-map-cache
+               cram-semantic-map
                vision_msgs-msg
                vision_srvs-srv
                std_msgs-msg
