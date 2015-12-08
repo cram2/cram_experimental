@@ -34,7 +34,7 @@
         #:cram-language-designator-support
         #:cram-utilities
         #:roslisp
-        #:cram-roslisp-common
+        #:cram-transforms-stamped
         #:alexandria)
   (:export table-setting-object
            situation?
