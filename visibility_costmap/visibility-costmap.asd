@@ -34,7 +34,7 @@
                cram-transforms-stamped
                cram-roslisp-common
                cram-language
-               semantic-map-costmap
+               cram-semantic-map-costmap
                cram-bullet-reasoning)
   :components
   ((:module "src"
