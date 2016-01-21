@@ -28,10 +28,10 @@
 (in-package :cl-user)
 
 (desig-props:def-desig-package visibility-costmap
-  (:use #:common-lisp #:crs #:location-costmap
-        #:cram-transforms-stamped #:cram-roslisp-common
+  (:use #:common-lisp #:prolog #:location-costmap
+        #:cram-transforms-stamped 
         #:desig)
-  (:import-from #:cram-reasoning #:<- #:def-fact-group)
+  (:import-from #:cram-prolog #:<- #:def-fact-group)
   (:desig-properties #:invisible-from #:visible-from
                      #:invisible-for #:visible-for #:robot
                      #:occluded-by))

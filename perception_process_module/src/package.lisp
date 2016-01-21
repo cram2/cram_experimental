@@ -31,16 +31,15 @@
     (:documentation "The preception process module")
   (:nicknames :perception-pm)
   (:use #:common-lisp
-        #:cram-roslisp-common
-        #:cram-reasoning
-        #:crs
+        #:cram-prolog
+        #:prolog
         #:cut
         #:desig
         #:cram-transforms-stamped
         #:cljlo-utils
         #:roslisp
         #:cram-plan-failures
-        #:semantic-map-cache)
+        #:cram-semantic-map)
   (:export
    #:perception #:object-not-found
    #:object-search-function

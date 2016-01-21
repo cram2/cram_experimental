@@ -1,8 +1,8 @@
 
 (asdf:defsystem map-annotation
-  :depends-on ("cram-roslisp-common"
+  :depends-on ("cram-transforms-stamped"
                "cl-transforms"
-               "cram-reasoning"
+               "cram-prolog"
                "map_annotation-srv")
   :components
   ((:file "package")
