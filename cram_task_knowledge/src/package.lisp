@@ -34,11 +34,11 @@
         #:cram-language-designator-support
         #:cram-utilities
         #:roslisp
-        #:cram-transforms-stamped
+        #:cram-tf
         #:alexandria)
   (:export table-setting-object
            situation?
            meal-time)
   (:import-from :cram-prolog def-fact-group <-)
-  (:import-from cram-transforms-stamped *transformer*)
+  (:import-from cram-tf *transformer*)
   (:desig-properties type situation meal-time breakfast lunch dinner))

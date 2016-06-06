@@ -37,6 +37,6 @@
         #:cram-plan-occasions-events
         #:cram-plan-library
         #:cram-prolog
-        #:cram-transforms-stamped)
+        #:cram-tf)
   (:shadowing-import-from #:cram-designators object object-designator)
   (:export run))

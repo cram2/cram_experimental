@@ -40,7 +40,7 @@
                cram-ocassions-events
                cram-robot-interfaces
                cram-designators
-               cram-transforms-stamped
+               cram-tf
                cljlo
                cljlo-utils
                actionlib

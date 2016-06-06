@@ -29,7 +29,7 @@
 
 (desig-props:def-desig-package visibility-costmap
   (:use #:common-lisp #:prolog #:location-costmap
-        #:cram-transforms-stamped 
+        #:cram-tf
         #:desig)
   (:import-from #:cram-prolog #:<- #:def-fact-group)
   (:desig-properties #:invisible-from #:visible-from

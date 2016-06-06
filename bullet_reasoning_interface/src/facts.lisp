@@ -6,7 +6,7 @@
 (defun exists-any-object (&optional (world btr:*current-bullet-world*))
   "Returns `t' if there exists any object in the world `world', `NIL' otherwise."
   (out-debug "exists-any-object()")
-  (not (null (force-ll (prolog `(household-object-type ,world ?objects ?types))))))
+  (not (null (force-ll (prolog `(item-type ,world ?objects ?types))))))
 
 (defun object-exists (name &optional (world btr:*current-bullet-world*))
   "Returns `t' if the object `name' exists in the world `world', `NIL' otherwise."
@@ -212,7 +212,7 @@ If `copy' is `t', the simulation and the evaluation will be executed on a copy o
       (object-get-collisions object :world (simulate-world simulate-duration :world world :copy copy))
       (let ((result (get-all-x-from-solution '?objects (force-ll (prolog `(and
                                                                            (contact ,world ,(make-keyword object) ?objects)
-                                                                           (household-object-type ,world ?objects ?type)))))))
+                                                                           (item-type ,world ?objects ?type)))))))
         (when (eq elem-type :string)
           (setf result (mapcar #'resolve-keyword result)))
         (when (eq list-type :vector)
@@ -229,7 +229,7 @@ If `copy' is `t', the simulation and the evaluation will be executed on a copy o
   (let ((result
           (if simulate-duration
               (get-stable-objects :world (simulate-world simulate-duration :world world :copy copy))
-              (get-all-x-from-solution '?object (force-ll (prolog `(and (household-object-type ,world ?object ?type)
+              (get-all-x-from-solution '?object (force-ll (prolog `(and (item-type ,world ?object ?type)
                                                                         (stable ,world ?object))))))))
     (get-elapsed-time)
     result))
@@ -249,11 +249,11 @@ If `copy' is `t', the simulation and the evaluation will be executed on a copy o
                                              (remove-camera)
                                              (let ((result
                                                      (force-ll (prolog `(and
-                                                                         (household-object-type ,world ?object ?type)
+                                                                         (item-type ,world ?object ?type)
                                                                          (visible-from ,world ,camera-pose ?object))))))
                                                (update-camera-pose camera-pose world)
                                                result))
-                                           (force-ll (prolog `(and (household-object-type ,world ?object ?type)
+                                           (force-ll (prolog `(and (item-type ,world ?object ?type)
                                                                    (visible ,world ?robot ?object)))))))
                                  (get-elapsed-time)
                                  result))))
@@ -262,7 +262,7 @@ If `copy' is `t', the simulation and the evaluation will be executed on a copy o
   "Returns a list of all objects in the world `world'."
   (get-all-x-from-solution
    '?obj
-   (force-ll (prolog `(and (household-object-type ,world ?obj ?type) (object ,world ?obj))))))
+   (force-ll (prolog `(and (item-type ,world ?obj ?type) (object ,world ?obj))))))
 
 (defun get-occlusions (&key (world btr:*current-bullet-world*) simulate-duration copy camera-pose)
   (if simulate-duration
@@ -273,12 +273,12 @@ If `copy' is `t', the simulation and the evaluation will be executed on a copy o
               (remove-camera)
               (setf result
                     (force-ll (prolog `(and
-                                        (household-object-type ,world ?objects ?type)
+                                        (item-type ,world ?objects ?type)
                                         (occluding-objects ,world ,camera-pose ?objects ?occluded-by)))))
               (update-camera-pose camera-pose))
             (setf result
                   (force-ll (prolog `(and
-                                      (household-object-type ,world ?objects ?type)
+                                      (item-type ,world ?objects ?type)
                                       (occluding-objects ,world ?robot ?objects ?occluded-by))))))
         (get-elapsed-time)
         (get-all-y-for-x-from-solution '?objects '?occluded-by result :ignore '(:kitchen)))))

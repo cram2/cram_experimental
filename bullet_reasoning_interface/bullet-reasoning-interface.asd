@@ -8,7 +8,7 @@
                cram-prolog
                bullet_reasoning_interface-srv
                bullet_reasoning_interface-msg
-               cram-transforms-stamped)
+               cram-tf)
   :components
   ((:module "src"
     :components

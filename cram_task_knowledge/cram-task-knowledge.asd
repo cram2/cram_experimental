@@ -33,8 +33,8 @@
   :depends-on (cram-language
                cram-prolog
                cram-designators
-	       cram-language-designator-support
-               cram-transforms-stamped
+               cram-language-designator-support
+               cram-tf
                cram-utilities
                alexandria)
   :components

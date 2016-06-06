@@ -35,7 +35,7 @@
         #:prolog
         #:cut
         #:desig
-        #:cram-transforms-stamped
+        #:cram-tf
         #:cljlo-utils
         #:roslisp
         #:cram-plan-failures

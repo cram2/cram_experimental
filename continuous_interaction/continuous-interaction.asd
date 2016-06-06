@@ -37,7 +37,7 @@
   :description "Continuous Interaction Helper Functionalities for CRAM Robot Plans"
   :depends-on (roslisp
                cram-designators
-               cram-transforms-stamped
+               cram-tf
                cram-plan-library
                cram-prolog
                cram-plan-knowledge

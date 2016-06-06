@@ -1,6 +1,6 @@
 
 (asdf:defsystem map-annotation
-  :depends-on ("cram-transforms-stamped"
+  :depends-on ("cram-tf"
                "cl-transforms"
                "cram-prolog"
                "map_annotation-srv")
