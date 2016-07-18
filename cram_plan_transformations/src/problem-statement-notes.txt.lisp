@@ -168,7 +168,7 @@ isA(spatula.n.01_senseID, spatula.n.01)
              (ros-warn (achieve plan-lib) "Retrying.")
              (retry))))
       (ros-info (achieve plan-lib) "Perceiving object")
-      (setf ?obj (perceive-object 'a ?obj)))
+      (setf ?obj (perceive-object :a ?obj)))
     (with-designators
         ((reach-object-location (location `((to reach)
                                             (obj ,?obj)
