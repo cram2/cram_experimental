@@ -32,11 +32,16 @@
   :maintainer "Gayane Kazhoyan"
   :license "BSD"
 
-  :depends-on ()
+  :depends-on (roslisp
+               cram-designators
+               cram-process-modules
+               cram-language
+               cram-occasions-events
+               cram-plan-occasions-events)
 
   :components
   ((:module "src"
     :components
     ((:file "package")
-     ;; (:file "designators" :depends-on ("package"))
+     (:file "plan-library" :depends-on ("package"))
      ))))
