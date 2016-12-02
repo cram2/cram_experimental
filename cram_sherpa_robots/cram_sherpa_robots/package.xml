@@ -9,5 +9,6 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <run_depend>cram_sherpa_robots_common</run_depend>
-  <run_depend>cram_sherpa_red_wasp</run_depend>
+  <run_depend>cram_sherpa_wasp</run_depend>
+  <run_depend>cram_sherpa_donkey</run_depend>
 </package>

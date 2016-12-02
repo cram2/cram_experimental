@@ -27,6 +27,10 @@
 ;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ;;; POSSIBILITY OF SUCH DAMAGE.
 
-(in-package :red-wasp)
+(in-package :cl-user)
 
-
+(defpackage cram-sherpa-wasp
+  (:nicknames #:wasp)
+  (:use #:common-lisp #:cram-prolog)
+  (:export #:wasp-bullet-projection-environment
+   ))
