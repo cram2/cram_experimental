@@ -31,6 +31,5 @@
 
 (defpackage cram-sherpa-robots-common
   (:nicknames #:robots-common)
-  (:use #:common-lisp #:cram-designators #:cram-process-modules)
-  (:export
-   ))
+  (:use #:common-lisp #:cram-designators #:cram-process-modules #:cram-prolog)
+  (:export #:location-pose #:perform))

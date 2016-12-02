@@ -27,22 +27,12 @@
 ;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ;;; POSSIBILITY OF SUCH DAMAGE.
 
-(defsystem cram-sherpa-robots-common
-  :author "Gayane Kazhoyan"
-  :maintainer "Gayane Kazhoyan"
-  :license "BSD"
+(in-package :robots-common)
 
-  :depends-on (roslisp
-               cram-designators
-               cram-process-modules
-               cram-language
-               cram-occasions-events
-               cram-plan-occasions-events
-               cram-prolog)
+(def-fact-group sherpa-utils ()
 
-  :components
-  ((:module "src"
-    :components
-    ((:file "package")
-     (:file "plan-library" :depends-on ("package"))
-     (:file "prolog" :depends-on ("package"))))))
+  (<- (location-pose ?location ?pose)
+    (-> (lisp-type ?location designator)
+        (desig-location-prop ?location ?pose)
+        (or (cram-tf:pose ?pose ?location)
+            (equal ?location ?pose)))))
