@@ -27,4 +27,17 @@
 ;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ;;; POSSIBILITY OF SUCH DAMAGE.
 
-(in-package :wasp)
+(defsystem cram-sherpa-red-wasp
+  :author "Gayane Kazhoyan"
+  :maintainer "Gayane Kazhoyan"
+  :license "BSD"
+
+  :depends-on (cram-sherpa-helicopter
+               cram-prolog
+               cram-robot-interfaces)
+
+  :components
+  ((:module "src"
+    :components
+    ((:file "package")
+     (:file "description" :depends-on ("package"))))))

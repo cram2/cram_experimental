@@ -27,24 +27,24 @@
 ;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ;;; POSSIBILITY OF SUCH DAMAGE.
 
-(defsystem cram-sherpa-donkey
+(defsystem cram-sherpa-helicopter
   :author "Gayane Kazhoyan"
   :maintainer "Gayane Kazhoyan"
   :license "BSD"
 
-  :depends-on (cram-process-modules
+  :depends-on (cl-transforms-stamped
+               cram-process-modules
                cram-prolog
                cram-designators
-               cram-sherpa-robots-common
-               cram-tf)
+               cram-projection
+               cram-sherpa-robots-common)
 
   :components
   ((:module "src"
     :components
     ((:file "package")
-     (:file "description" :depends-on ("package"))
      (:file "low-level" :depends-on ("package"))
-     (:file "process-modules" :depends-on ("package" "low-level"))
      (:file "designators" :depends-on ("package"))
-     (:file "plans" :depends-on ("package"))
-     (:file "ros" :depends-on ("package"))))))
+     (:file "process-modules" :depends-on ("package" "designators" "low-level"))
+     (:file "projection" :depends-on ("package" "designators"))
+     (:file "plans" :depends-on ("package" "projection" "process-modules"))))))

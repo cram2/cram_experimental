@@ -27,29 +27,9 @@
 ;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ;;; POSSIBILITY OF SUCH DAMAGE.
 
-(in-package :wasp)
+(in-package :cl-user)
 
-(def-fact-group wasp-pms (cpm:matching-process-module
-                          cpm:available-process-module)
-
-  (<- (cpm:matching-process-module ?motion-designator wasp-actuators)
-    (or (desig:desig-prop ?motion-designator (:type :flying))
-        (desig:desig-prop ?motion-designator (:to :fly))))
-
-  (<- (cpm:matching-process-module ?motion-designator wasp-actuators)
-    (or (desig:desig-prop ?motion-designator (:type :switching-engine))
-        (desig:desig-prop ?motion-designator (:to :switch-engine))))
-
-  (<- (cpm:matching-process-module ?motion-designator wasp-actuators)
-    (or (desig:desig-prop ?motion-designator (:type :setting-altitude))
-        (desig:desig-prop ?motion-designator (:to :set-altitude))))
-
-  (<- (cpm:matching-process-module ?motion-designator wasp-sensors)
-    (or (desig:desig-prop ?motion-designator (:type :switching-beacon))
-        (desig:desig-prop ?motion-designator (:to :switch-beacon))))
-
-  (<- (cpm:available-process-module wasp-actuators)
-    (not (cpm:projection-running ?_)))
-
-  (<- (cpm:available-process-module wasp-sensors)
-    (not (cpm:projection-running ?_))))
+(defpackage cram-sherpa-hawk
+  (:nicknames #:hawk)
+  (:use #:common-lisp #:cram-prolog)
+  (:export #:hawk))

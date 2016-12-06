@@ -27,7 +27,7 @@
 ;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ;;; POSSIBILITY OF SUCH DAMAGE.
 
-(in-package :wasp)
+(in-package :helicopter)
 
 (defun projection-altitude (altitude)
   (declare (type number altitude))
@@ -45,59 +45,19 @@
   (declare (type cl-transforms-stamped:pose-stamped goal))
   (format t "projection fly ~a~%" goal)
   ;; the names are in the sandbox
-  ;; (btr-utils:move-object *red-wasp-name* goal)
-  )
+  (assert
+   (prolog:prolog
+    `(and (cram-robot-interfaces:robot ?robot)
+          (btr:bullet-world ?w)
+          (btr:assert (btr:object-pose ?w ?robot ,goal))))))
 
-(defun projection-set-beacon (on?)
-  (declare (type boolean on?))
-  (format t "projection set-beacon ~a~%" on?)
-  )
-
-
-(cram-projection:define-projection-environment wasp-bullet-projection-environment
-  ;; :special-variable-initializers
-  ;; ((*transformer* (make-instance 'cl-tf:transformer))
-  ;;  (*current-bullet-world* (cl-bullet:copy-world *current-bullet-world*))
-  ;;  (*current-timeline* (btr:timeline-init *current-bullet-world*))
-  ;;  (desig:*default-role* 'projection-role)
-  ;;  (*projection-clock* (make-instance 'partially-ordered-clock))
-  ;;  (cut:*timestamp-function* #'projection-timestamp-function))
-  :process-module-definitions (wasp-projection-actuators wasp-projection-sensors)
-  ;; :startup (update-tf)
-  ;; :shutdown (setf *last-timeline* *current-timeline*)
-  )
-
-(def-fact-group wasp-projection-pms (cpm:matching-process-module
-                                     cpm:projection-running
-                                     cpm:available-process-module)
-
-  (<- (cpm:matching-process-module ?motion-designator wasp-projection-actuators)
-    (or (desig:desig-prop ?motion-designator (:type :flying))
-        (desig:desig-prop ?motion-designator (:to :fly))))
-
-  (<- (cpm:matching-process-module ?motion-designator wasp-projection-actuators)
-    (or (desig:desig-prop ?motion-designator (:type :switching-engine))
-        (desig:desig-prop ?motion-designator (:to :switch-engine))))
-
-  (<- (cpm:matching-process-module ?motion-designator wasp-projection-actuators)
-    (or (desig:desig-prop ?motion-designator (:type :setting-altitude))
-        (desig:desig-prop ?motion-designator (:to :set-altitude))))
-
-  (<- (cpm:matching-process-module ?motion-designator wasp-projection-sensors)
-    (or (desig:desig-prop ?motion-designator (:type :switching-beacon))
-        (desig:desig-prop ?motion-designator (:to :switch-beacon))))
-
-  (<- (cpm:projection-running ?_)
-    (symbol-value cram-projection:*projection-environment* wasp-bullet-projection-environment))
-
-  (<- (cpm:available-process-module wasp-projection-actuators)
-    (symbol-value cram-projection:*projection-environment* wasp-bullet-projection-environment))
-
-  (<- (cpm:available-process-module wasp-projection-sensors)
-    (symbol-value cram-projection:*projection-environment* wasp-bullet-projection-environment)))
+;; (defun projection-set-beacon (on?)
+;;   (declare (type boolean on?))
+;;   (format t "projection set-beacon ~a~%" on?)
+;;   )
 
 
-(cpm:def-process-module wasp-projection-actuators (motion-designator)
+(cpm:def-process-module helicopter-projection-actuators (motion-designator)
   (destructuring-bind (command parameter)
       (desig:reference motion-designator)
     (ecase command
@@ -108,9 +68,58 @@
       (set-altitude
        (projection-altitude parameter)))))
 
-(cpm:def-process-module wasp-projection-sensors (motion-designator)
-  (destructuring-bind (command parameter)
-      (desig:reference motion-designator)
-    (ecase command
-      (switch-beacon
-       (projection-set-beacon parameter)))))
+;; (cpm:def-process-module helicopter-projection-sensors (motion-designator)
+;;   (destructuring-bind (command parameter)
+;;       (desig:reference motion-designator)
+;;     (ecase command
+;;       (switch-beacon
+;;        (projection-set-beacon parameter)))))
+
+
+(cram-projection:define-projection-environment helicopter-bullet-projection-environment
+  ;; :special-variable-initializers
+  ;; ((*transformer* (make-instance 'cl-tf:transformer))
+  ;;  (*current-bullet-world* (cl-bullet:copy-world *current-bullet-world*))
+  ;;  (*current-timeline* (btr:timeline-init *current-bullet-world*))
+  ;;  (desig:*default-role* 'projection-role)
+  ;;  (*projection-clock* (make-instance 'partially-ordered-clock))
+  ;;  (cut:*timestamp-function* #'projection-timestamp-function))
+  :process-module-definitions (helicopter-projection-actuators ;; helicopter-projection-sensors
+                                                               )
+  ;; :startup (update-tf)
+  ;; :shutdown (setf *last-timeline* *current-timeline*)
+  )
+
+(def-fact-group helicopter-projection-pms (cpm:matching-process-module
+                                     cpm:projection-running
+                                     cpm:available-process-module)
+
+  (<- (cpm:matching-process-module ?motion-designator helicopter-projection-actuators)
+    (or (desig:desig-prop ?motion-designator (:type :flying))
+        (desig:desig-prop ?motion-designator (:to :fly))))
+
+  (<- (cpm:matching-process-module ?motion-designator helicopter-projection-actuators)
+    (or (desig:desig-prop ?motion-designator (:type :switching-engine))
+        (desig:desig-prop ?motion-designator (:to :switch-engine))))
+
+  (<- (cpm:matching-process-module ?motion-designator helicopter-projection-actuators)
+    (or (desig:desig-prop ?motion-designator (:type :setting-altitude))
+        (desig:desig-prop ?motion-designator (:to :set-altitude))))
+
+  ;; (<- (cpm:matching-process-module ?motion-designator wasp-projection-sensors)
+  ;;   (or (desig:desig-prop ?motion-designator (:type :switching-beacon))
+  ;;       (desig:desig-prop ?motion-designator (:to :switch-beacon))))
+
+  (<- (cpm:projection-running ?_)
+    (symbol-value cram-projection:*projection-environment*
+                  helicopter-bullet-projection-environment))
+
+  (<- (cpm:available-process-module helicopter-projection-actuators)
+    (symbol-value cram-projection:*projection-environment*
+                  helicopter-bullet-projection-environment))
+
+  ;; (<- (cpm:available-process-module wasp-projection-sensors)
+  ;;   (symbol-value cram-projection:*projection-environment*
+  ;;                 helicopter-bullet-projection-environment))
+  )
+

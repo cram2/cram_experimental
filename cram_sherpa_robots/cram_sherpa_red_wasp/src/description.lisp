@@ -27,24 +27,9 @@
 ;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ;;; POSSIBILITY OF SUCH DAMAGE.
 
-(defsystem cram-sherpa-wasp
-  :author "Gayane Kazhoyan"
-  :maintainer "Gayane Kazhoyan"
-  :license "BSD"
+(in-package :red-wasp)
 
-  :depends-on (cl-transforms-stamped
-               cram-process-modules
-               cram-prolog
-               cram-designators
-               cram-projection
-               cram-sherpa-robots-common)
+(def-fact-group red-wasp-metadata (cram-robot-interfaces:robot)
 
-  :components
-  ((:module "src"
-    :components
-    ((:file "package")
-     (:file "low-level" :depends-on ("package"))
-     (:file "designators" :depends-on ("package"))
-     (:file "process-modules" :depends-on ("package" "designators" "low-level"))
-     (:file "projection" :depends-on ("package" "designators"))
-     (:file "plans" :depends-on ("package" "projection" "process-modules"))))))
+  ;; (<- (cram-robot-interfaces:robot red-wasp))
+  )

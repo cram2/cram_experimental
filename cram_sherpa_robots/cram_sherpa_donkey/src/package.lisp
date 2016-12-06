@@ -32,5 +32,4 @@
 (defpackage cram-sherpa-donkey
   (:nicknames #:donkey)
   (:use #:common-lisp #:cram-prolog #:cram-designators)
-  (:export
-   ))
+  (:export #:donkey))

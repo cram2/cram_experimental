@@ -27,24 +27,30 @@
 ;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ;;; POSSIBILITY OF SUCH DAMAGE.
 
-(defsystem cram-sherpa-donkey
-  :author "Gayane Kazhoyan"
-  :maintainer "Gayane Kazhoyan"
-  :license "BSD"
+(in-package :helicopter)
 
-  :depends-on (cram-process-modules
-               cram-prolog
-               cram-designators
-               cram-sherpa-robots-common
-               cram-tf)
+(def-fact-group helicopter-pms (cpm:matching-process-module
+                                cpm:available-process-module)
 
-  :components
-  ((:module "src"
-    :components
-    ((:file "package")
-     (:file "description" :depends-on ("package"))
-     (:file "low-level" :depends-on ("package"))
-     (:file "process-modules" :depends-on ("package" "low-level"))
-     (:file "designators" :depends-on ("package"))
-     (:file "plans" :depends-on ("package"))
-     (:file "ros" :depends-on ("package"))))))
+  (<- (cpm:matching-process-module ?motion-designator helicopter-actuators)
+    (or (desig:desig-prop ?motion-designator (:type :flying))
+        (desig:desig-prop ?motion-designator (:to :fly))))
+
+  (<- (cpm:matching-process-module ?motion-designator helicopter-actuators)
+    (or (desig:desig-prop ?motion-designator (:type :switching-engine))
+        (desig:desig-prop ?motion-designator (:to :switch-engine))))
+
+  (<- (cpm:matching-process-module ?motion-designator helicopter-actuators)
+    (or (desig:desig-prop ?motion-designator (:type :setting-altitude))
+        (desig:desig-prop ?motion-designator (:to :set-altitude))))
+
+  ;; (<- (cpm:matching-process-module ?motion-designator wasp-sensors)
+  ;;   (or (desig:desig-prop ?motion-designator (:type :switching-beacon))
+  ;;       (desig:desig-prop ?motion-designator (:to :switch-beacon))))
+
+  (<- (cpm:available-process-module helicopter-actuators)
+    (not (cpm:projection-running ?_)))
+
+  ;; (<- (cpm:available-process-module wasp-sensors)
+  ;;   (not (cpm:projection-running ?_)))
+  )

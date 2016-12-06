@@ -27,9 +27,9 @@
 ;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ;;; POSSIBILITY OF SUCH DAMAGE.
 
-(in-package :wasp)
+(in-package :helicopter)
 
-(def-fact-group wasp-motions (desig:motion-desig)
+(def-fact-group helicopter-motions (desig:motion-desig)
 
   (<- (desig:motion-desig ?motion-designator (fly ?pose))
     (or (and (desig:desig-prop ?motion-designator (:type :flying))
@@ -64,7 +64,7 @@
 
 
 
-(def-fact-group wasp-actions (desig:action-desig)
+(def-fact-group helicopter-actions (desig:action-desig)
 
   ;;;;;;;;;;;;;;;;;;;;;; land ;;;;;;;;;;;;;;;;;;;;;;;;;
 

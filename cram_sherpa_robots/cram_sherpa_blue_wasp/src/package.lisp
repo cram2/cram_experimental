@@ -29,8 +29,7 @@
 
 (in-package :cl-user)
 
-(defpackage cram-sherpa-wasp
-  (:nicknames #:wasp)
+(defpackage cram-sherpa-blue-wasp
+  (:nicknames #:blue-wasp)
   (:use #:common-lisp #:cram-prolog)
-  (:export #:wasp-bullet-projection-environment
-   ))
+  (:export #:blue-wasp))
