@@ -52,7 +52,7 @@
              (desig:desig-prop ?motion-designator (:value ?altitude)))
         (and (desig:desig-prop ?motion-designator (:to :set-altitude))
              (desig:desig-prop ?motion-designator (:to ?altitude))
-             (not (equal ?location :set-altitude)))))
+             (not (equal ?altitude :set-altitude)))))
 
   (<- (desig:motion-desig ?motion-designator (switch-beacon ?on-or-off))
     (or (desig:desig-prop ?motion-designator (:type :switching-beacon))

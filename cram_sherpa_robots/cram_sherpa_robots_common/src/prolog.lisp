@@ -31,6 +31,8 @@
 
 (def-fact-group sherpa-utils ()
 
+  (<- (terrain-name terrain))
+
   (<- (location-pose ?location ?pose)
     (-> (lisp-type ?location designator)
         (desig-location-prop ?location ?pose)

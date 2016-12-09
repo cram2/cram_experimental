@@ -12,6 +12,7 @@
   <depend>cl_transforms_stamped</depend>
   <depend>cram_process_modules</depend>
   <depend>cram_prolog</depend>
+  <depend>cram_utilities</depend>
   <depend>cram_designators</depend>
   <depend>cram_projection</depend>
   <depend>cram_sherpa_robots_common</depend>

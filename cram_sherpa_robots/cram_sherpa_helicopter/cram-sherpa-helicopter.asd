@@ -35,6 +35,7 @@
   :depends-on (cl-transforms-stamped
                cram-process-modules
                cram-prolog
+               cram-utilities
                cram-designators
                cram-projection
                cram-sherpa-robots-common)

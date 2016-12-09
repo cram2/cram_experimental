@@ -29,17 +29,66 @@
 
 (in-package :helicopter)
 
+(defun spawn-object-aabb-box (object-name
+                              &key
+                                (box-name (intern (concatenate
+                                                   'string
+                                                   (symbol-name object-name)
+                                                   "-BOX")))
+                                (world btr:*current-bullet-world*))
+  (let* ((aabb (btr:aabb (btr-utils:object-instance object-name)))
+         (aabb-pose (cl-transforms:make-pose
+                     (cl-bullet:bounding-box-center aabb)
+                     (cl-transforms:make-identity-rotation)))
+         (aabb-size (with-slots (cl-transforms:x cl-transforms:y cl-transforms:z)
+                        (cl-bullet:bounding-box-dimensions aabb)
+                      (list cl-transforms:x cl-transforms:y cl-transforms:z))))
+    (btr:add-object world :box box-name aabb-pose :mass 0.0 :size aabb-size)
+    box-name))
+
+(defun translate-object (object-name &optional (pose-z-delta 0.0))
+  (let* ((object-pose (btr-utils:object-pose object-name))
+         (new-pose (cl-transforms:copy-pose
+                    object-pose
+                    :origin (cl-transforms:copy-3d-vector
+                             (cl-transforms:origin object-pose)
+                             :z (+ pose-z-delta
+                                   (cl-transforms:z (cl-transforms:origin object-pose)))))))
+    (btr-utils:move-object object-name new-pose)))
+
+(defun calculate-altitude-bullet (object-name &optional (z-delta 0.1))
+  (let ((box-name (spawn-object-aabb-box object-name))
+        (terrain-name (cut:var-value '?terrain
+                                     (car (prolog:prolog
+                                           '(robots-common:terrain-name ?terrain))))))
+    ;; hack to make collision detection acknowledge the box
+    (translate-object box-name 0.1)
+    (translate-object box-name -0.1)
+    (let ((steps-to-collision
+            (loop for i = 0 then (+ 1 i)
+                  until (member (btr-utils:object-instance box-name)
+                                (btr:find-objects-in-contact btr:*current-bullet-world*
+                                                             (btr-utils:object-instance
+                                                              terrain-name)))
+                  do (translate-object box-name (- z-delta))
+                  finally (return i))))
+      (btr-utils:kill-object box-name)
+      (* z-delta steps-to-collision))))
+
 (defun projection-altitude (altitude)
   (declare (type number altitude))
   (format t "projection altitude ~a~%" altitude)
-  )
+  (let* ((my-name (cut:var-value '?name
+                                 (car (prolog:prolog
+                                       '(cram-robot-interfaces:robot ?name)))))
+         (current-altitude (calculate-altitude-bullet my-name)))
+    (translate-object my-name (- altitude current-altitude))))
 
 (defun projection-engine (on?)
   (declare (type boolean on?))
   (format t "projection engine ~a~%" on?)
   (unless on?
-    ;;set altitude to 0.1
-    ))
+    (projection-altitude -2)))
 
 (defun projection-fly (goal)
   (declare (type cl-transforms-stamped:pose-stamped goal))
