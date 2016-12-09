@@ -47,11 +47,16 @@
 (defun projection-fly (goal)
   (declare (type cl-transforms-stamped:pose-stamped goal))
   (format t "projection fly ~a~%" goal)
-  (assert
-   (prolog:prolog
-    `(and (cram-robot-interfaces:robot ?robot)
-          (btr:bullet-world ?w)
-          (btr:assert (btr:object-pose ?w ?robot ,goal))))))
+  (let* ((my-name (cut:var-value '?name
+                                 (car (prolog:prolog
+                                       '(cram-robot-interfaces:robot ?name)))))
+         (current-altitude (calculate-altitude-bullet my-name)))
+    (assert
+     (prolog:prolog
+      `(and (cram-robot-interfaces:robot ?robot)
+            (btr:bullet-world ?w)
+            (btr:assert (btr:object-pose ?w ?robot ,goal)))))
+    (projection-altitude current-altitude)))
 
 ;; (defun projection-set-beacon (on?)
 ;;   (declare (type boolean on?))

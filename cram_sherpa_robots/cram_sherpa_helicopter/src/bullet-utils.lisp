@@ -56,7 +56,7 @@
                                    (cl-transforms:z (cl-transforms:origin object-pose)))))))
     (btr-utils:move-object object-name new-pose)))
 
-(defun calculate-altitude-bullet (object-name &optional (z-delta 0.1))
+(defun calculate-altitude-bullet (object-name &key (z-delta 0.1) (nudge-robot T))
   (let ((box-name (spawn-object-aabb-box object-name))
         (terrain-name (cut:var-value '?terrain
                                      (car (prolog:prolog
@@ -64,13 +64,27 @@
     ;; hack to make collision detection acknowledge the box
     (translate-object box-name 0.1)
     (translate-object box-name -0.1)
-    (let ((steps-to-collision
-            (loop for i = 0 then (+ 1 i)
-                  until (member (btr-utils:object-instance box-name)
+    (if (member (btr-utils:object-instance box-name)
+                (btr:find-objects-in-contact btr:*current-bullet-world*
+                                             (btr-utils:object-instance terrain-name)))
+        ;; somehow underneath the terrain -> go up first
+        (progn
+          (when nudge-robot
+            (loop for i = 0 then (1+ i)
+                  while (member (btr-utils:object-instance box-name)
                                 (btr:find-objects-in-contact btr:*current-bullet-world*
                                                              (btr-utils:object-instance
                                                               terrain-name)))
-                  do (translate-object box-name (- z-delta))
-                  finally (return i))))
-      (btr-utils:kill-object box-name)
-      (* z-delta steps-to-collision))))
+                  do (translate-object box-name z-delta)
+                  finally (translate-object object-name (* z-delta (1- i)))))
+            (btr-utils:kill-object box-name)
+            0.0)
+        ;; above terrain -> go down
+        (loop for i = 0 then (1+ i)
+                      until (member (btr-utils:object-instance box-name)
+                                    (btr:find-objects-in-contact btr:*current-bullet-world*
+                                                                 (btr-utils:object-instance
+                                                                  terrain-name)))
+                      do (translate-object box-name (- z-delta))
+                      finally (btr-utils:kill-object box-name)
+                              (return (* z-delta i))))))
