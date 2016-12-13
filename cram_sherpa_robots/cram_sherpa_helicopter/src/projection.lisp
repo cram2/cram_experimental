@@ -41,8 +41,10 @@
 (defun projection-engine (on?)
   (declare (type boolean on?))
   (format t "projection engine ~a~%" on?)
-  (unless on?
-    (projection-altitude -2)))
+  (if on?
+    ;; fix for such a low-res collision shape of terrain
+      (projection-altitude -2.8)
+      (projection-altitude -3)))
 
 (defun projection-fly (goal)
   (declare (type cl-transforms-stamped:pose-stamped goal))

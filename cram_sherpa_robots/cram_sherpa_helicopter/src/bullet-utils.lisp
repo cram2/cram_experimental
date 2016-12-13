@@ -29,6 +29,9 @@
 
 (in-package :helicopter)
 
+(defvar *altitude-bullet-world*
+  (prog1 (make-instance 'btr:bt-reasoning-world)))
+
 (defun spawn-object-aabb-box (object-name
                               &key
                                 (box-name (intern (concatenate

@@ -29,78 +29,59 @@
 
 (in-package :helicopter)
 
-(def-fact-group helicopter-motions (desig:motion-desig)
+(def-fact-group helicopter-motions (motion-desig)
 
-  (<- (desig:motion-desig ?motion-designator (fly ?pose))
-    (or (and (desig:desig-prop ?motion-designator (:type :flying))
-             (desig:desig-prop ?motion-designator (:destination ?location)))
-        (and (desig:desig-prop ?motion-designator (:to :fly))
-             (desig:desig-prop ?motion-designator (:to ?location))
+  (<- (motion-desig ?motion-designator (fly ?pose))
+    (or (and (desig-prop ?motion-designator (:type :flying))
+             (desig-prop ?motion-designator (:destination ?location)))
+        (and (desig-prop ?motion-designator (:to :fly))
+             (desig-prop ?motion-designator (:to ?location))
              (not (equal ?location :fly))))
-    (cram-sherpa-robots-common:location-pose ?location ?pose))
+    (location-pose ?location ?pose))
 
-  (<- (desig:motion-desig ?motion-designator (switch-engine ?on-or-off))
-    (or (desig:desig-prop ?motion-designator (:type :switching-engine))
-        (desig:desig-prop ?motion-designator (:to :switch-engine)))
-    (or (and (desig:desig-prop ?motion-designator (:state :on))
+  (<- (motion-desig ?motion-designator (switch-engine ?on-or-off))
+    (or (desig-prop ?motion-designator (:type :switching-engine))
+        (desig-prop ?motion-designator (:to :switch-engine)))
+    (or (and (desig-prop ?motion-designator (:state :on))
              (equal ?on-or-off T))
-        (and (desig:desig-prop ?motion-designator (:state :off))
+        (and (desig-prop ?motion-designator (:state :off))
              (equal ?on-or-off NIL))))
 
-  (<- (desig:motion-desig ?motion-designator (set-altitude ?altitude))
-    (or (and (desig:desig-prop ?motion-designator (:type :setting-altitude))
-             (desig:desig-prop ?motion-designator (:value ?altitude)))
-        (and (desig:desig-prop ?motion-designator (:to :set-altitude))
-             (desig:desig-prop ?motion-designator (:to ?altitude))
+  (<- (motion-desig ?motion-designator (set-altitude ?altitude))
+    (or (and (desig-prop ?motion-designator (:type :setting-altitude))
+             (desig-prop ?motion-designator (:value ?altitude)))
+        (and (desig-prop ?motion-designator (:to :set-altitude))
+             (desig-prop ?motion-designator (:to ?altitude))
              (not (equal ?altitude :set-altitude)))))
 
-  (<- (desig:motion-desig ?motion-designator (switch-beacon ?on-or-off))
-    (or (desig:desig-prop ?motion-designator (:type :switching-beacon))
-        (desig:desig-prop ?motion-designator (:to :switch-beacon)))
-    (or (and (desig:desig-prop ?motion-designator (:state :on))
-             (equal ?on-or-off T))
-        (and (desig:desig-prop ?motion-designator (:state :off))
-             (equal ?on-or-off NIL)))))
-
-
-
-(def-fact-group helicopter-actions (desig:action-desig)
-
-  ;;;;;;;;;;;;;;;;;;;;;; land ;;;;;;;;;;;;;;;;;;;;;;;;;
-
-  ;; (<- (cpm:matching-process-module ?motion-designator donkey-nav)
-  ;;   (or (desig-prop ?motion-designator (:type :landing))
-  ;;       (desig-prop ?motion-designator (:to :land))))
-
-  ;; (<- (motion-desig ?motion-designator (drive ?pose))
-  ;;   (or
-  ;;    (and (desig-prop ?motion-designator (:type :driving))
-  ;;         (desig-prop ?motion-designator (:destination ?location)))
-  ;;    (and (desig-prop ?motion-designator (:to :drive))
-  ;;         (desig-prop ?motion-designator (:to ?location))
-  ;;         (not (equal ?location :drive))))
-  ;;   (cram-sherpa-robots-common:location-pose ?location ?pose))
-
-
-  ;;;;;;;;;;;;;;;;;;;;;; take-off ;;;;;;;;;;;;;;;;;;;;;;
-
-  ;; (<- (cpm:matching-process-module ?motion-designator donkey-manip)
-  ;;   (or (desig-prop ?motion-designator (:type :taking-off))
-  ;;       (desig-prop ?motion-designator (:to :take-off))))
-
-  ;; (<- (motion-desig ?motion-designator (take-off))
-  ;;   (or (desig-prop ?motion-designator (:type :taking-off))
-  ;;       (desig-prop ?motion-designator (:to :take-off))))
-
-
-  ;;;;;;;;;;;;;;;;;;;;;; sense ;;;;;;;;;;;;;;;;;;;;;;
-
-  ;; (<- (cpm:matching-process-module ?motion-designator donkey-manip)
-  ;;   (or (desig-prop ?motion-designator (:type :sensing))
-  ;;       (desig-prop ?motion-designator (:to :sense))))
-
-  ;; (<- (motion-desig ?motion-designator (mount ?robot-name))
-  ;;   (or (desig-prop ?motion-designator (:type :mounting))
-  ;;       (desig-prop ?motion-designator (:to :mount)))
-
+  ;; (<- (desig:motion-desig ?motion-designator (switch-beacon ?on-or-off))
+  ;;   (or (desig:desig-prop ?motion-designator (:type :switching-beacon))
+  ;;       (desig:desig-prop ?motion-designator (:to :switch-beacon)))
+  ;;   (or (and (desig:desig-prop ?motion-designator (:state :on))
+  ;;            (equal ?on-or-off T))
+  ;;       (and (desig:desig-prop ?motion-designator (:state :off))
+  ;;            (equal ?on-or-off NIL))))
   )
+
+
+
+(def-fact-group helicopter-actions (action-desig)
+
+  (<- (action-desig ?action-designator (land ?pose))
+    (or (and (desig-prop ?action-designator (:type :landing))
+             (desig-prop ?action-designator (:destination ?location)))
+        (and (desig-prop ?action-designator (:to :land))
+             (desig-prop ?action-designator (:at ?location))))
+    (location-pose ?location ?pose))
+
+  (<- (action-desig ?action-designator (take-off ?altitude))
+    (or (and (desig-prop ?action-designator (:type :taking-off))
+             (desig-prop ?action-designator (:altitude ?altitude)))
+        (and (desig-prop ?action-designator (:to :take-off))
+             (desig-prop ?action-designator (:to ?altitude))
+             (not (equal ?altitude :take-off)))))
+
+  (<- (action-desig ?action-designator (scan ?area))
+    (or (desig-prop ?action-designator (:type :scanning))
+        (desig-prop ?action-designator (:to :scan)))
+    (desig-prop ?action-designator (:area ?area))))

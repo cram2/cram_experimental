@@ -31,5 +31,5 @@
 
 (defpackage cram-sherpa-helicopter
   (:nicknames #:helicopter)
-  (:use #:common-lisp #:cram-prolog)
+  (:use #:common-lisp #:cram-prolog #:cram-designators #:cram-sherpa-robots-common)
   (:export #:helicopter-bullet-projection-environment))
