@@ -33,6 +33,10 @@
 
 (define-condition json-key-not-supported (simple-warning) ())
 
+(define-condition json-parser-failed (error)
+  ((description :initarg :description :reader error-description))
+  (:report (lambda (condition stream)
+             (format stream (error-description condition)))))
 
 (defgeneric parse-json-node (name node)
   (:documentation "Parses a key-value pair, where `name' is the key
@@ -59,10 +63,24 @@ This is where the result of YASON:PARSE lands."
                           (parse-json-node key-name (cdr elem)))))
                      the-list)))
 
+(defun parse-designator-description (the-list)
+  "A general function to parse things like (a location ((prop1 val1)))"
+  (destructuring-bind (article designator-type designator-properties)
+      the-list
+    (declare (ignore article))
+    (desig:make-designator
+     (intern (string-upcase designator-type) :keyword)
+     (parse-property-list designator-properties))))
 
 (defun parse-action-json (json-string)
-  (desig:make-designator :action
-                         (parse-property-list (yason:parse json-string :object-as :alist))))
+  (handler-case
+      (parse-designator-description (yason:parse json-string :object-as :alist))
+    (error (error-object)
+      (error 'json-parser-failed
+             :description (format nil
+                                  "Could not parse json string ~a:~%~a"
+                                  json-string
+                                  error-object)))))
 
 
 ;;; Individual implementations of parsing different key-value pairs,
