@@ -38,11 +38,15 @@
                cram-language
                cram-occasions-events
                cram-plan-occasions-events
-               cram-prolog)
+               cram-prolog
+               yason ; for parsing json action designators
+               cram-tf ; for parsing json pose-stamped-s
+               )
 
   :components
   ((:module "src"
     :components
     ((:file "package")
      (:file "plan-library" :depends-on ("package"))
-     (:file "prolog" :depends-on ("package"))))))
+     (:file "prolog" :depends-on ("package"))
+     (:file "action-json-parser" :depends-on ("package"))))))

@@ -15,7 +15,6 @@
   <!-- <depend>cl_transforms_stamped</depend> -->
   <!-- <depend>cl_tf</depend> -->
   <!-- <depend>actionlib_lisp</depend> -->
-  <!-- <depend>yason</depend> -->
   <!-- <depend>alexandria</depend> -->
   <!-- <depend>cram_utilities</depend> -->
   <depend>cram_designators</depend>
@@ -24,7 +23,8 @@
   <depend>cram_occasions_events</depend>
   <depend>cram_plan_occasions_events</depend>
   <depend>cram_prolog</depend>
-  <!-- <depend>cram_tf</depend> -->
+  <depend>yason</depend>
+  <depend>cram_tf</depend>
   <!-- <depend>cram_robot_interfaces</depend> -->
   <!-- <depend>cram_plan_failures</depend> -->
   <!-- <depend>sensor_msgs</depend> -->
