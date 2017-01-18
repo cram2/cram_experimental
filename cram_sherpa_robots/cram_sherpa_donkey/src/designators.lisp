@@ -42,7 +42,7 @@
   (<- (motion-desig ?motion-designator (drive ?pose))
     (or
      (and (desig-prop ?motion-designator (:type :driving))
-          (desig-prop ?motion-designator (:destination ?location)))
+          (desig-prop ?motion-designator (:goal ?location)))
      (and (desig-prop ?motion-designator (:to :drive))
           (desig-prop ?motion-designator (:to ?location))
           (not (equal ?location :drive))))
@@ -61,7 +61,7 @@
   (<- (motion-desig ?motion-designator (mount ?robot-name))
     (or (desig-prop ?motion-designator (:type :mounting))
         (desig-prop ?motion-designator (:to :mount)))
-    (desig-prop ?motion-designator (:object ?robot-name)))
+    (desig-prop ?motion-designator (:agent ?robot-name)))
 
   ;; (<- (cpm:available-process-module donkey-nav)
   ;;   (not (cpm:projection-running ?_))

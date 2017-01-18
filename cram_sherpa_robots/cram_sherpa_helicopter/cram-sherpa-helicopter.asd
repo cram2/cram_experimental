@@ -38,7 +38,10 @@
                cram-utilities
                cram-designators
                cram-projection
-               cram-sherpa-robots-common)
+               cram-sherpa-robots-common
+               roslisp-utilities
+               cram-bullet-reasoning
+               cram-bullet-reasoning-utilities)
 
   :components
   ((:module "src"

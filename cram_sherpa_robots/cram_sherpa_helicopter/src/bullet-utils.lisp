@@ -29,8 +29,14 @@
 
 (in-package :helicopter)
 
-(defvar *altitude-bullet-world*
-  (prog1 (make-instance 'btr:bt-reasoning-world)))
+(defvar *altitude-bullet-world* nil "copy of bullet world to do altitude calc")
+
+(defun init-altitude-world ()
+  (setf *altitude-bullet-world* (make-instance 'btr:bt-reasoning-world))
+  ;; (btr:add-object world )
+  )
+
+(roslisp-utilities:register-ros-init-function init-altitude-world)
 
 (defun spawn-object-aabb-box (object-name
                               &key

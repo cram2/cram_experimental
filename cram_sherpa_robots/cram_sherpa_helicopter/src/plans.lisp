@@ -37,7 +37,8 @@
 (defun land (?pose)
   (declare (type cl-transforms-stamped:pose-stamped ?pose))
   (format t "land ~a~%" ?pose)
-  (perform (a motion (to fly) (to ?pose)))
+  (when ?pose
+    (perform (a motion (to fly) (to ?pose))))
   (perform (a motion (to set-altitude) (to 0)))
   (perform (a motion (to switch-engine) (state off))))
 
@@ -83,3 +84,15 @@ E.g. (#<3D-VECTOR (d w h)> #<POSE-STAMPED ('frame' stamp (x y z) (q1 q2 q3 w))>)
           (perform (a motion (to fly) (to ?goal))))
         (calculate-area-via-points area *visibility-range*)))
 
+(defun continuously-perceive (object-name)
+  (format t "continuously-perceive ~a~%" object-name)
+  ;; TODO
+  )
+
+(defparameter *navigation-altitude* 2
+  "In meters. Will be changed into a Prolog rule.")
+
+(defun navigate (?location)
+  (format t "go ~a~%" ?location)
+  (perform (an action (to take-off) (to *navigation-altitude*)))
+  (perform (a motion (to fly) (to ?location))))
