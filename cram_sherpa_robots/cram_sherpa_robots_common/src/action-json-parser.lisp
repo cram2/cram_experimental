@@ -73,6 +73,7 @@ This is where the result of YASON:PARSE lands."
      (parse-property-list designator-properties))))
 
 (defun parse-action-json (json-string)
+  (format t "JSON: ~a~%" json-string)
   (handler-case
       (parse-designator-description (yason:parse json-string :object-as :alist))
     (error (error-object)

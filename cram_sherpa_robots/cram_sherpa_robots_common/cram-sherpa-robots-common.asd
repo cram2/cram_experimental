@@ -41,6 +41,8 @@
                cram-prolog
                yason ; for parsing json action designators
                cram-tf ; for parsing json pose-stamped-s
+               sherpa_msgs-msg ; for communication between robots and commander
+               sherpa_msgs-srv
                )
 
   :components
@@ -49,4 +51,5 @@
     ((:file "package")
      (:file "plan-library" :depends-on ("package"))
      (:file "prolog" :depends-on ("package"))
-     (:file "action-json-parser" :depends-on ("package"))))))
+     (:file "action-json-parser" :depends-on ("package"))
+     (:file "actions-ros" :depends-on ("package" "action-json-parser"))))))
