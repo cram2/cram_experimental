@@ -32,6 +32,9 @@
 (define-condition designator-reference-failure (cpl:simple-plan-failure)
   ((result :initarg :result :reader result :initform nil))
   (:default-initargs :format-control "designator-failure"))
+(define-condition designator-goal-parsing-failure (cpl:simple-plan-failure)
+  ((result :initarg :result :reader result :initform nil))
+  (:default-initargs :format-control "designator-goal-parsing-failure"))
 
 (defun try-reference-designator (designator &optional (error-message ""))
   (handler-case (reference designator)
@@ -41,9 +44,13 @@
                 :format-arguments (list designator error-message)))))
 
 (defun convert-desig-goal-to-occasion (keyword-expression)
-  (destructuring-bind (occasion &rest params)
-      keyword-expression
-    (cons (intern (string-upcase occasion) :cram-plan-occasions-events) params)))
+  (handler-case (destructuring-bind (occasion &rest params)
+                    keyword-expression
+                  (cons (intern (string-upcase occasion) :cram-plan-occasions-events) params))
+    (error (error-message)
+      (cpl:fail 'designator-goal-parsing-failure
+                :format-control "Designator goal ~a could not be parsed.~%~a"
+                :format-arguments (list keyword-expression error-message)))))
 
 (defgeneric perform (designator)
   (:documentation "If the action designator has a GOAL key it will be checked if the goal holds.

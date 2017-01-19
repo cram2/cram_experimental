@@ -73,7 +73,6 @@ This is where the result of YASON:PARSE lands."
      (parse-property-list designator-properties))))
 
 (defun parse-action-json (json-string)
-  (format t "JSON: ~a~%" json-string)
   (handler-case
       (parse-designator-description (yason:parse json-string :object-as :alist))
     (error (error-object)
@@ -109,14 +108,12 @@ This is where the result of YASON:PARSE lands."
   (cons name node))
 
 (defmethod parse-json-node ((name (eql :goal)) node)
-  (destructuring-bind (article designator-type designator-properties)
-      (car node)
-    (declare (ignore article))
-    (list name
-          (desig:make-designator
-           (intern (string-upcase designator-type) :keyword)
-           (parse-property-list designator-properties)))))
+  (list name (parse-designator-description (car node))))
 
+(defmethod parse-json-node ((name (eql :to)) node)
+  (if (listp (car node))
+      (list name (parse-designator-description (car node)))
+      (list name (intern (string-upcase (car node)) :keyword))))
 
 ;;; LOCATION PROPERTIES
 
