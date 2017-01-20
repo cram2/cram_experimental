@@ -40,4 +40,5 @@
   ((:module "src"
     :components
     ((:file "package")
-     (:file "description" :depends-on ("package"))))))
+     (:file "description" :depends-on ("package"))
+     (:file "designators" :depends-on ("package"))))))

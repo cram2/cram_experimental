@@ -1,5 +1,5 @@
 ;;;
-;;; Copyright (c) 2016, Gayane Kazhoyan <kazhoyan@cs.uni-bremen.de>
+;;; Copyright (c) 2017, Gayane Kazhoyan <kazhoyan@cs.uni-bremen.de>
 ;;; All rights reserved.
 ;;;
 ;;; Redistribution and use in source and binary forms, with or without
@@ -27,20 +27,15 @@
 ;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ;;; POSSIBILITY OF SUCH DAMAGE.
 
-(in-package :donkey)
+(in-package :blue-wasp)
 
-(def-fact-group donkey-pms (cpm:matching-process-module
-                            cpm:available-process-module)
+(def-fact-group blue-wasp-pms (cpm:matching-process-module
+                               cpm:available-process-module)
 
-  (<- (cpm:matching-process-module ?motion-designator donkey-navigation)
-    (or (desig-prop ?motion-designator (:type :driving))
-        (desig-prop ?motion-designator (:to :drive))))
+  (<- (cpm:matching-process-module ?motion-designator blue-wasp-sensors)
+    (or (desig:desig-prop ?motion-designator (:type :switching))
+        (desig:desig-prop ?motion-designator (:to :switch)))
+    (desig-prop ?motion-designator (:device :camera)))
 
-  (<- (cpm:matching-process-module ?motion-designator donkey-manipulation)
-    (or (desig-prop ?motion-designator (:type :mounting))
-        (desig-prop ?motion-designator (:to :mount))))
-
-  (<- (cpm:available-process-module donkey-navigation)
-    (not (cpm:projection-running ?_)))
-  (<- (cpm:available-process-module donkey-manipulation)
+  (<- (cpm:available-process-module blue-wasp-sensors)
     (not (cpm:projection-running ?_))))

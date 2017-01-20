@@ -32,11 +32,11 @@
 (def-fact-group helicopter-motions (motion-desig)
 
   (<- (motion-desig ?motion-designator (fly ?pose))
-    (or (and (desig-prop ?motion-designator (:type :flying))
-             (desig-prop ?motion-designator (:goal ?location)))
-        (and (desig-prop ?motion-designator (:to :fly))
-             (desig-prop ?motion-designator (:to ?location))
-             (not (equal ?location :fly))))
+    (or (desig-prop ?motion-designator (:type :flying))
+        (desig-prop ?motion-designator (:to :fly)))
+    (or (and (desig-prop ?motion-designator (:to ?location))
+             (not (equal ?location :fly)))
+        (desig-prop ?motion-designator (:destination ?location)))
     (location-pose ?location ?pose))
 
   (<- (motion-desig ?motion-designator (switch-engine ?on-or-off))
@@ -49,39 +49,30 @@
              (equal ?on-or-off NIL))))
 
   (<- (motion-desig ?motion-designator (set-altitude ?altitude))
-    (or (and (desig-prop ?motion-designator (:type :setting-altitude))
-             (desig-prop ?motion-designator (:value ?altitude)))
-        (and (desig-prop ?motion-designator (:to :set-altitude))
-             (desig-prop ?motion-designator (:to ?altitude))
+    (or (desig-prop ?motion-designator (:type :setting-altitude))
+        (desig-prop ?motion-designator (:to :set-altitude)))
+    (or (desig-prop ?motion-designator (:value ?altitude)))
+        (and (desig-prop ?motion-designator (:to ?altitude))
              (not (equal ?altitude :set-altitude)))))
-
-  ;; (<- (desig:motion-desig ?motion-designator (switch-beacon ?on-or-off))
-  ;;   (or (desig:desig-prop ?motion-designator (:type :switching-beacon))
-  ;;       (desig:desig-prop ?motion-designator (:to :switch-beacon)))
-  ;;   (or (and (desig:desig-prop ?motion-designator (:state :on))
-  ;;            (equal ?on-or-off T))
-  ;;       (and (desig:desig-prop ?motion-designator (:state :off))
-  ;;            (equal ?on-or-off NIL))))
-  )
 
 
 
 (def-fact-group helicopter-actions (action-desig)
 
   (<- (action-desig ?action-designator (land ?pose))
-    ;; GOAL or AT are optional
+    ;; DESTINATION/AT are optional
     (or (desig-prop ?action-designator (:type :landing))
         (desig-prop ?action-designator (:to :land)))
-    (-> (or (desig-prop ?action-designator (:goal ?location))
+    (-> (or (desig-prop ?action-designator (:destination ?location))
             (desig-prop ?action-designator (:at ?location)))
         (location-pose ?location ?pose)
         (equal ?pose NIL)))
 
   (<- (action-desig ?action-designator (take-off ?altitude))
-    (or (and (desig-prop ?action-designator (:type :taking-off))
-             (desig-prop ?action-designator (:altitude ?altitude)))
-        (and (desig-prop ?action-designator (:to :take-off))
-             (desig-prop ?action-designator (:to ?altitude))
+    (or (desig-prop ?action-designator (:type :taking-off))
+        (desig-prop ?action-designator (:to :take-off)))
+    (or (desig-prop ?action-designator (:altitude ?altitude))
+        (and (desig-prop ?action-designator (:to ?altitude))
              (not (equal ?altitude :take-off)))))
 
   (<- (action-desig ?action-designator (scan ?area))
@@ -95,9 +86,9 @@
     (desig-prop ?action-designator (:object ?object-name)))
 
   (<- (action-desig ?action-designator (navigate ?pose))
-    (or (and (desig-prop ?action-designator (:type :going))
-             (desig-prop ?action-designator (:goal ?location)))
-        (and (desig-prop ?motion-designator (:to :go))
-             (desig-prop ?motion-designator (:to ?location))
+    (or (desig-prop ?action-designator (:type :going))
+        (desig-prop ?motion-designator (:to :go)))
+    (or (desig-prop ?action-designator (:destination ?location))
+        (and (desig-prop ?motion-designator (:to ?location))
              (not (equal ?location :go))))
     (location-pose ?location ?pose)))

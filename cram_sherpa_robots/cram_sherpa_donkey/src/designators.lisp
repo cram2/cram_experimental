@@ -29,15 +29,7 @@
 
 (in-package :donkey)
 
-(def-fact-group donkey-actions (desig:motion-desig
-                                cpm:matching-process-module
-                                cpm:available-process-module)
-
-  ;;;;;;;;;;;;;;;;;;;;;; drive ;;;;;;;;;;;;;;;;;;;;;;;;;
-
-  (<- (cpm:matching-process-module ?motion-designator donkey-nav)
-    (or (desig-prop ?motion-designator (:type :driving))
-        (desig-prop ?motion-designator (:to :drive))))
+(def-fact-group donkey-motions (desig:motion-desig)
 
   (<- (motion-desig ?motion-designator (drive ?pose))
     (or
@@ -48,22 +40,7 @@
           (not (equal ?location :drive))))
     (cram-sherpa-robots-common:location-pose ?location ?pose))
 
-  ;; (<- (cpm:available-process-module donkey-nav)
-  ;;   (not (cpm:projection-running ?_))
-  ;;   )
-
-  ;;;;;;;;;;;;;;;;;;;;;; mount ;;;;;;;;;;;;;;;;;;;;;;
-
-  (<- (cpm:matching-process-module ?motion-designator donkey-manip)
-    (or (desig-prop ?motion-designator (:type :mounting))
-        (desig-prop ?motion-designator (:to :mount))))
-
   (<- (motion-desig ?motion-designator (mount ?robot-name))
     (or (desig-prop ?motion-designator (:type :mounting))
         (desig-prop ?motion-designator (:to :mount)))
-    (desig-prop ?motion-designator (:agent ?robot-name)))
-
-  ;; (<- (cpm:available-process-module donkey-nav)
-  ;;   (not (cpm:projection-running ?_))
-  ;;   )
-  )
+    (desig-prop ?motion-designator (:agent ?robot-name))))

@@ -1,5 +1,5 @@
 ;;;
-;;; Copyright (c) 2016, Gayane Kazhoyan <kazhoyan@cs.uni-bremen.de>
+;;; Copyright (c) 2017, Gayane Kazhoyan <kazhoyan@cs.uni-bremen.de>
 ;;; All rights reserved.
 ;;;
 ;;; Redistribution and use in source and binary forms, with or without
@@ -27,20 +27,15 @@
 ;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ;;; POSSIBILITY OF SUCH DAMAGE.
 
-(in-package :donkey)
+(in-package :red-wasp)
 
-(def-fact-group donkey-pms (cpm:matching-process-module
-                            cpm:available-process-module)
+(def-fact-group red-wasp-motions (desig:motion-desig)
 
-  (<- (cpm:matching-process-module ?motion-designator donkey-navigation)
-    (or (desig-prop ?motion-designator (:type :driving))
-        (desig-prop ?motion-designator (:to :drive))))
-
-  (<- (cpm:matching-process-module ?motion-designator donkey-manipulation)
-    (or (desig-prop ?motion-designator (:type :mounting))
-        (desig-prop ?motion-designator (:to :mount))))
-
-  (<- (cpm:available-process-module donkey-navigation)
-    (not (cpm:projection-running ?_)))
-  (<- (cpm:available-process-module donkey-manipulation)
-    (not (cpm:projection-running ?_))))
+  (<- (desig:motion-desig ?motion-designator (switch-beacon ?on-or-off))
+    (or (desig:desig-prop ?motion-designator (:type :switching))
+        (desig:desig-prop ?motion-designator (:to :switch)))
+    (desig-prop ?motion-designator (:device :beacon))
+    (or (and (desig:desig-prop ?motion-designator (:state :on))
+             (equal ?on-or-off T))
+        (and (desig:desig-prop ?motion-designator (:state :off))
+             (equal ?on-or-off NIL)))))
