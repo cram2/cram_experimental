@@ -19,11 +19,11 @@
   <depend>yason</depend>
   <depend>cram_tf</depend>
   <depend>sherpa_msgs</depend>
+  <depend>actionlib_lisp</depend>
   <!-- <depend>roslisp_utilities</depend> -->
   <!-- <depend>cl_transforms</depend> -->
   <!-- <depend>cl_transforms_stamped</depend> -->
   <!-- <depend>cl_tf</depend> -->
-  <!-- <depend>actionlib_lisp</depend> -->
   <!-- <depend>alexandria</depend> -->
   <!-- <depend>cram_utilities</depend> -->
   <!-- <depend>cram_robot_interfaces</depend> -->

@@ -1,5 +1,5 @@
 ;;;
-;;; Copyright (c) 2016, Gayane Kazhoyan <kazhoyan@cs.uni-bremen.de>
+;;; Copyright (c) 2017, Gayane Kazhoyan <kazhoyan@cs.uni-bremen.de>
 ;;; All rights reserved.
 ;;;
 ;;; Redistribution and use in source and binary forms, with or without
@@ -27,29 +27,6 @@
 ;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ;;; POSSIBILITY OF SUCH DAMAGE.
 
-(defsystem cram-sherpa-robots-common
-  :author "Gayane Kazhoyan"
-  :maintainer "Gayane Kazhoyan"
-  :license "BSD"
+(in-package :robots-common)
 
-  :depends-on (roslisp
-               cram-designators
-               cram-process-modules
-               cram-language
-               cram-occasions-events
-               cram-plan-occasions-events
-               cram-prolog
-               yason ; for parsing json action designators
-               cram-tf ; for parsing json pose-stamped-s
-               sherpa_msgs-msg ; for communication between robots and commander
-               sherpa_msgs-srv
-               actionlib)
 
-  :components
-  ((:module "src"
-    :components
-    ((:file "package")
-     (:file "plan-library" :depends-on ("package"))
-     (:file "prolog" :depends-on ("package"))
-     (:file "action-json-parser" :depends-on ("package"))
-     (:file "action-designator-server" :depends-on ("package" "action-json-parser"))))))
