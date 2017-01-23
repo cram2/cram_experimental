@@ -34,4 +34,5 @@
   (:use #:common-lisp #:cram-designators #:cram-process-modules #:cram-prolog)
   (:export #:perform
            #:location-pose
-           #:terrain-name #:terrain))
+           #:terrain-name #:terrain
+           #:define-action-client))

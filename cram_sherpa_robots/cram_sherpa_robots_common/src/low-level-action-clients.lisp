@@ -29,4 +29,34 @@
 
 (in-package :robots-common)
 
+(defmacro define-action-client (name timeout ros-name type)
+  "Creates this and that."
+  (let* ((package (symbol-package name))
+         (param-name (intern (format nil "*~a-ACTION-TIMEOUT*" name) package))
+         (action-var-name (intern (format nil "*~a-ACTION-CLIENT*" name) package))
+         (init-function-name (intern (format nil "INIT-~a-ACTION-CLIENT" name) package))
+         (destroy-function-name (intern (format nil "DESTROY-~a-ACTION-CLIENT" name) package))
+         (getter-function-name (intern (format nil "GET-~a-ACTION-CLIENT" name) package)))
+    `(progn
 
+       (defparameter ,param-name ,timeout
+         ,(format nil "How many seconds to wait before returning from ~a action." name))
+
+       (defvar ,action-var-name nil)
+
+       (defun ,init-function-name ()
+         (setf ,action-var-name (actionlib:make-action-client ,ros-name ,type))
+         (loop until (actionlib:wait-for-server ,action-var-name 5.0)
+               do (roslisp:ros-info (ptu-action-client)
+                                    "Waiting for ~a action server..." ',name))
+         (roslisp:ros-info (robots-common action-client)
+                           "~a action client created." ',name)
+         ,action-var-name)
+
+       (defun ,destroy-function-name ()
+         (setf ,action-var-name nil))
+
+       (roslisp-utilities:register-ros-cleanup-function ,destroy-function-name)
+
+       (defun ,getter-function-name ()
+         (or ,action-var-name (,init-function-name))))))
