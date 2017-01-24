@@ -60,3 +60,77 @@
 
        (defun ,getter-function-name ()
          (or ,action-var-name (,init-function-name))))))
+
+
+#+nil
+(
+ /donkey/mount  sherpa_msgs/MountAction
+ /donkey/drive              MoveToAction
+
+ /hawk/fly                  MoveToAction
+       set_altitude         SetAltitudeAction
+       toggle_engine        ToggleActuatorAction
+       toggle_camera        ToggleActuatorAction
+       take_picture         TakePictureAction
+
+ /red_wasp/fly              MoveToAction
+           set_altitude     SetAltitudeAction
+           toggle_engine    ToggleActuatorAction
+           toggle_beacon    ToggleActuatorAction
+
+ /blue_wasp/fly
+            set_altitude    SetAltitudeAction
+            toggle_engine   ToggleActuatorAction
+            toggle_camera   ToggleActuatorAction
+            take_picture    TakePictureAction
+            detect_victim   ToggleVictimTrackingAction
+)
+
+(defmacro make-symbol-type-message (msg-type-as-symbol &rest args)
+  "Same as roslisp:make-message only better"
+  `(roslisp::set-fields-fn
+    (make-instance ,msg-type-as-symbol)
+    ,@(loop
+        for i from 0
+        for arg in args
+        collect (if (evenp i)
+                    `',(mapcar
+                        #'roslisp::convert-to-keyword
+                        (roslisp::designated-list arg))
+                    arg))))
+
+(defun make-mount-goal (target-name mount?-otherwise-unmount)
+  (declare (type string target-name)
+           (type boolean mount?-otherwise-unmount))
+  (make-symbol-type-message
+   'sherpa_msgs-msg:MountGoal
+   :target_name target-name
+   :mounted_state mount?-otherwise-unmount))
+
+(defun make-move-to-goal (goal)
+  (declare (type cl-transforms-stamped:pose-stamped goal))
+  (make-symbol-type-message
+   'sherpa_msgs-msg:MoveToGoal
+   :goal (cl-transforms-stamped:to-msg goal)))
+
+(defun make-set-altitude-goal (altitude)
+  (declare (type number altitude))
+  (make-symbol-type-message
+   'sherpa_msgs-msg:SetAltitudeGoal
+   :altitude altitude))
+
+(defun make-take-picture-goal ()
+  (make-symbol-type-message
+   'sherpa_msgs-msg:TakePictureGoal))
+
+(defun make-toggle-actuator-goal (on?-otherwise-off)
+  (declare (type boolean on?-otherwise-off))
+  (make-symbol-type-message
+   'sherpa_msgs-msg:ToggleActuatorGoal
+   :command on?-otherwise-off))
+
+(defun make-toggle-victim-tracking-goal (on?-otherwise-off)
+  (declare (type boolean on?-otherwise-off))
+  (make-symbol-type-message
+   'sherpa_msgs-msg:ToggleVictimTrackingGoal
+   :command on?-otherwise-off))

@@ -28,3 +28,8 @@
 ;;; POSSIBILITY OF SUCH DAMAGE.
 
 (in-package :donkey)
+
+(def-fact-group donkey-metadata (cram-robot-interfaces:robot)
+
+  ;; (<- (cram-robot-interfaces:robot donkey))
+  )

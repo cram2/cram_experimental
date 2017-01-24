@@ -29,4 +29,10 @@
 
 (in-package :donkey)
 
+;;  /donkey/mount  sherpa_msgs/MountAction
+;;  /donkey/drive              MoveToAction
+
+(define-action-client drive 5 "donkey/mount" "sherpa_msgs/MoveToAction")
+
+(define-action-client mount 5 "donkey/drive" "sherpa_msgs/MountAction")
 

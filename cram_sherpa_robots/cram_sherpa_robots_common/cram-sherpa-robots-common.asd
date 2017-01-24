@@ -43,7 +43,9 @@
                cram-tf ; for parsing json pose-stamped-s
                sherpa_msgs-msg ; for communication between robots and commander
                sherpa_msgs-srv
-               actionlib)
+               actionlib
+;               geometry_msgs-msg ; to represent poses, currently using cl-trans-stamped
+               cl-transforms-stamped)
 
   :components
   ((:module "src"
@@ -52,4 +54,5 @@
      (:file "plan-library" :depends-on ("package"))
      (:file "prolog" :depends-on ("package"))
      (:file "action-json-parser" :depends-on ("package"))
-     (:file "action-designator-server" :depends-on ("package" "action-json-parser"))))))
+     (:file "action-designator-server" :depends-on ("package" "action-json-parser"))
+     (:file "low-level-action-clients" :depends-on ("package"))))))

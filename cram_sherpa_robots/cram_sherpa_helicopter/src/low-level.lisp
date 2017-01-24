@@ -39,19 +39,19 @@
  /hawk/fly                  MoveToAction
        set_altitude         SetAltitudeAction
        toggle_engine        ToggleActuatorAction
-       toggle_camera        ToggleActuator
+       toggle_camera        ToggleActuatorAction
        take_picture         TakePictureAction
 
  /red_wasp/fly              MoveToAction
-           set_altitude
-           toggle_engine
-           toggle_beacon
+           set_altitude     SetAltitudeAction
+           toggle_engine    ToggleActuatorAction
+           toggle_beacon    ToggleActuatorAction
 
  /blue_wasp/fly
-            set_altitude
-            toggle_engine
-            toggle_camera
-            take_picture
+            set_altitude    SetAltitudeAction
+            toggle_engine   ToggleActuatorAction
+            toggle_camera   ToggleActuatorAction
+            take_picture    TakePictureAction
             detect_victim   ToggleVictimTrackingAction
  )
 
