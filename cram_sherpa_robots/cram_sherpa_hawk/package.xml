@@ -12,4 +12,5 @@
   <depend>cram_sherpa_helicopter</depend>
   <depend>cram_prolog</depend>
   <depend>cram_robot_interfaces</depend>
+  <depend>cram_sherpa_robots_common</depend>
 </package>

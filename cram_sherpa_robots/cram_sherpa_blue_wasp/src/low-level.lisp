@@ -27,9 +27,21 @@
 ;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ;;; POSSIBILITY OF SUCH DAMAGE.
 
-(in-package :cl-user)
+(in-package :blue-wasp)
 
-(defpackage cram-sherpa-blue-wasp
-  (:nicknames #:blue-wasp)
-  (:use #:common-lisp #:cram-prolog #:cram-sherpa-robots-common)
-  (:export #:blue-wasp))
+#+somereallyweirdfeature
+(
+ /blue_wasp/fly             MoveToAction
+            set_altitude    SetAltitudeAction
+            toggle_engine   ToggleActuatorAction
+            toggle_camera   ToggleActuatorAction
+            take_picture    TakePictureAction
+            detect_victim   ToggleVictimTrackingAction
+ )
+
+(define-action-client blue-wasp fly "sherpa_msgs/MoveToAction" 5)
+(define-action-client blue-wasp set-altitude "sherpa_msgs/SetAltitudeAction" 5)
+(define-action-client blue-wasp toggle-engine "sherpa_msgs/ToggleActuatorAction" 5)
+(define-action-client blue-wasp toggle-camera "sherpa_msgs/ToggleActuatorAction" 5)
+(define-action-client blue-wasp take-picture "sherpa_msgs/TakePictureAction" 5)
+(define-action-client blue-wasp detect-victim "sherpa_msgs/ToggleVictimTrackingAction" 5)

@@ -35,4 +35,10 @@
   (:export #:perform
            #:location-pose
            #:terrain-name #:terrain
-           #:define-action-client))
+           #:define-action-client
+           #:make-mount-goal
+           #:make-move-to-goal
+           #:make-set-altitude-goal
+           #:make-take-picture-goal
+           #:make-toggle-actuator-goal
+           #:make-toggle-victim-tracking-goal))

@@ -1,5 +1,5 @@
 ;;;
-;;; Copyright (c) 2016, Gayane Kazhoyan <kazhoyan@cs.uni-bremen.de>
+;;; Copyright (c) 2017, Gayane Kazhoyan <kazhoyan@cs.uni-bremen.de>
 ;;; All rights reserved.
 ;;;
 ;;; Redistribution and use in source and binary forms, with or without
@@ -27,9 +27,14 @@
 ;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ;;; POSSIBILITY OF SUCH DAMAGE.
 
-(in-package :cl-user)
+(in-package :red-wasp)
 
-(defpackage cram-sherpa-blue-wasp
-  (:nicknames #:blue-wasp)
-  (:use #:common-lisp #:cram-prolog #:cram-sherpa-robots-common)
-  (:export #:blue-wasp))
+;; /red_wasp/fly              MoveToAction
+;;           set_altitude     SetAltitudeAction
+;;           toggle_engine    ToggleActuatorAction
+;;           toggle_beacon    ToggleActuatorAction
+
+(define-action-client red-wasp fly "sherpa_msgs/MoveToAction" 5)
+(define-action-client red-wasp set-altitude "sherpa_msgs/SetAltitudeAction" 5)
+(define-action-client red-wasp toggle-engine "sherpa_msgs/ToggleActuatorAction" 5)
+(define-action-client red-wasp toggle-beacon "sherpa_msgs/ToggleActuatorAction" 5)

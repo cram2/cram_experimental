@@ -34,11 +34,13 @@
 
   :depends-on (cram-sherpa-helicopter
                cram-prolog
-               cram-robot-interfaces)
+               cram-robot-interfaces
+               cram-sherpa-robots-common)
 
   :components
   ((:module "src"
     :components
     ((:file "package")
      (:file "description" :depends-on ("package"))
+     (:file "low-level" :depends-on ("package"))
      (:file "designators" :depends-on ("package"))))))

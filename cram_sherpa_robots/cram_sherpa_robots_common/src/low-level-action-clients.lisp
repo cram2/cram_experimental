@@ -29,14 +29,45 @@
 
 (in-package :robots-common)
 
-(defmacro define-action-client (name timeout ros-name type)
+(defun action-type-class-name (action-type)
+  (declare (type string action-type))
+  "partly taken from roslisp implementation of MAKE-MESSAGE-FN"
+  (destructuring-bind (pkg-name type)
+      (roslisp-utils:tokens (string-upcase (actionlib::action-msg-type action-type "Goal"))
+                            :separators '(#\/))
+    (let ((pkg (find-package (intern (concatenate 'string pkg-name "-MSG") 'keyword))))
+      (assert pkg nil "Can't find package ~a-MSG" pkg-name)
+      (let ((class-name (find-symbol type pkg)))
+        (assert class-name nil "Can't find class for ~a" action-type)
+        class-name))))
+
+(defun rosify_ (lispy-symbol)
+  (declare (type symbol lispy-symbol))
+  "taken from cram_json_prolog PROLOGIFY function"
+  (flet ((contains-lower-case-char (symbol)
+           (and
+            (find-if (lambda (ch)
+                       (let ((lch (char-downcase ch)))
+                         (and (find lch "abcdefghijklmnopqrstuvwxyz")
+                              (eq lch ch))))
+                     (symbol-name symbol))
+            t)))
+    (if (contains-lower-case-char lispy-symbol)
+        (string lispy-symbol)
+        (string-downcase (substitute #\_ #\- (copy-seq (string lispy-symbol)))))))
+
+
+(defmacro define-action-client (agent-name name type timeout)
   "Creates this and that."
   (let* ((package (symbol-package name))
          (param-name (intern (format nil "*~a-ACTION-TIMEOUT*" name) package))
          (action-var-name (intern (format nil "*~a-ACTION-CLIENT*" name) package))
          (init-function-name (intern (format nil "INIT-~a-ACTION-CLIENT" name) package))
          (destroy-function-name (intern (format nil "DESTROY-~a-ACTION-CLIENT" name) package))
-         (getter-function-name (intern (format nil "GET-~a-ACTION-CLIENT" name) package)))
+         (getter-function-name (intern (format nil "GET-~a-ACTION-CLIENT" name) package))
+         (call-function-name (intern (format nil "CALL-~a-ACTION" name) package))
+         (ros-name (concatenate 'string (rosify_ agent-name) "/"
+                                (roslisp-utilities:rosify-lisp-name name))))
     `(progn
 
        (defparameter ,param-name ,timeout
@@ -59,10 +90,24 @@
        (roslisp-utilities:register-ros-cleanup-function ,destroy-function-name)
 
        (defun ,getter-function-name ()
-         (or ,action-var-name (,init-function-name))))))
+         (or ,action-var-name (,init-function-name)))
+
+       (defun ,call-function-name (&optional action-goal (timeout ,param-name))
+         (declare (type (or null ,(action-type-class-name type)) action-goal)
+                  (type number timeout))
+         (cpl:with-failure-handling
+             ((simple-error (e)
+                (format t "Actionlib error occured!~%~a~%Reinitializing...~%~%" e)
+                (,init-function-name)
+                (cpl:retry)))
+           (let ((actionlib:*action-server-timeout* 10.0))
+             (actionlib:call-goal
+              (,getter-function-name)
+              action-goal
+              :timeout timeout)))))))
 
 
-#+nil
+#+hohohohoandabottleofrum
 (
  /donkey/mount  sherpa_msgs/MountAction
  /donkey/drive              MoveToAction

@@ -29,10 +29,14 @@
 
 (in-package :donkey)
 
-;;  /donkey/mount  sherpa_msgs/MountAction
-;;  /donkey/drive              MoveToAction
+;; /donkey/mount  sherpa_msgs/MountAction
+;; /donkey/drive              MoveToAction
 
-(define-action-client drive 5 "donkey/mount" "sherpa_msgs/MoveToAction")
+(define-action-client donkey drive "sherpa_msgs/MoveToAction" 5)
+(define-action-client donkey mount "sherpa_msgs/MountAction" 5)
 
-(define-action-client mount 5 "donkey/drive" "sherpa_msgs/MountAction")
-
+;; (call-drive-action (make-move-to-goal (cl-transforms-stamped:make-pose-stamped
+;;                                        cram-tf:*fixed-frame*
+;;                                        0.0
+;;                                        (cl-transforms:make-identity-vector)
+;;                                        (cl-transforms:make-identity-rotation))))
