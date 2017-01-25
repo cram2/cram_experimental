@@ -38,9 +38,54 @@
 
   (<- (cpm:matching-process-module ?motion-designator donkey-manipulation)
     (or (desig-prop ?motion-designator (:type :mounting))
-        (desig-prop ?motion-designator (:to :mount))))
+        (desig-prop ?motion-designator (:to :mount))
+        (desig-prop ?motion-designator (:type :unmounting))
+        (desig-prop ?motion-designator (:to :unmount))))
 
   (<- (cpm:available-process-module donkey-navigation)
     (not (cpm:projection-running ?_)))
   (<- (cpm:available-process-module donkey-manipulation)
     (not (cpm:projection-running ?_))))
+
+
+(cpm:def-process-module donkey-navigation (motion-designator)
+  (destructuring-bind (command argument) (reference motion-designator)
+    (ecase command
+      (drive
+       (handler-case
+           (call-drive-action
+            :action-goal (cram-sherpa-robots-common:make-move-to-goal argument))
+         ;; (cram-plan-failures:look-at-failed ()
+         ;;   (cpl:fail 'cram-plan-failures:look-at-failed :motion motion-designator))
+         )))))
+
+(cpm:def-process-module donkey-manipulation (motion-designator)
+  (destructuring-bind (command argument mount?-otherwise-unmount)
+      (reference motion-designator)
+    (ecase command
+      (mount
+       (handler-case
+           (call-mount-action
+            :action-goal (cram-sherpa-robots-common:make-mount-goal
+                          argument mount?-otherwise-unmount))
+         ;; (cram-plan-failures:look-at-failed ()
+         ;;   (cpl:fail 'cram-plan-failures:look-at-failed :motion motion-designator))
+         )))))
+
+;; Examples:
+;;
+;; (cpm:with-process-modules-running
+;;   (donkey::donkey-navigation)
+;; (cpl:top-level
+;;   (cpm:pm-execute-matching
+;;    (desig:a motion
+;;             (to drive)
+;;             (to ((1 1 1) ( 0 0 0 1)))))))
+;;
+;; (cpm:with-process-modules-running
+;;     (donkey::donkey-navigation donkey::donkey-manipulation)
+;;   (cpl:top-level
+;;     (cpm:pm-execute-matching
+;;      (desig:an motion
+;;                (to unmount)
+;;                (agent red-wasp)))))

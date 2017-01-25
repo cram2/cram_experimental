@@ -92,9 +92,11 @@
        (defun ,getter-function-name ()
          (or ,action-var-name (,init-function-name)))
 
-       (defun ,call-function-name (&optional action-goal (timeout ,param-name))
+       (defun ,call-function-name (&key action-goal action-timeout)
          (declare (type (or null ,(action-type-class-name type)) action-goal)
-                  (type number timeout))
+                  (type (or null number) action-timeout))
+         (unless action-timeout
+           (setf action-timeout ,param-name))
          (cpl:with-failure-handling
              ((simple-error (e)
                 (format t "Actionlib error occured!~%~a~%Reinitializing...~%~%" e)
@@ -104,7 +106,7 @@
              (actionlib:call-goal
               (,getter-function-name)
               action-goal
-              :timeout timeout)))))))
+              :timeout action-timeout)))))))
 
 
 #+hohohohoandabottleofrum
@@ -145,18 +147,20 @@
                     arg))))
 
 (defun make-mount-goal (target-name mount?-otherwise-unmount)
-  (declare (type string target-name)
+  (declare (type (or symbol string) target-name)
            (type boolean mount?-otherwise-unmount))
   (make-symbol-type-message
    'sherpa_msgs-msg:MountGoal
-   :target_name target-name
+   :target_name (format nil "~a" target-name)
    :mounted_state mount?-otherwise-unmount))
 
 (defun make-move-to-goal (goal)
-  (declare (type cl-transforms-stamped:pose-stamped goal))
+  (declare (type (or cl-transforms-stamped:pose-stamped cl-transforms:pose) goal))
   (make-symbol-type-message
    'sherpa_msgs-msg:MoveToGoal
-   :goal (cl-transforms-stamped:to-msg goal)))
+   :goal (cl-transforms-stamped:to-msg
+          (cl-transforms-stamped:ensure-pose-stamped
+           goal cram-tf:*fixed-frame* 0.0))))
 
 (defun make-set-altitude-goal (altitude)
   (declare (type number altitude))

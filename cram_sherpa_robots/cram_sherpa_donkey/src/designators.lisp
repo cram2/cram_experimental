@@ -34,13 +34,18 @@
   (<- (motion-desig ?motion-designator (drive ?pose))
     (or
      (and (desig-prop ?motion-designator (:type :driving))
-          (desig-prop ?motion-designator (:goal ?location)))
+          (desig-prop ?motion-designator (:destination ?location)))
      (and (desig-prop ?motion-designator (:to :drive))
           (desig-prop ?motion-designator (:to ?location))
           (not (equal ?location :drive))))
     (cram-sherpa-robots-common:location-pose ?location ?pose))
 
-  (<- (motion-desig ?motion-designator (mount ?robot-name))
+  (<- (motion-desig ?motion-designator (mount ?robot-name T))
     (or (desig-prop ?motion-designator (:type :mounting))
         (desig-prop ?motion-designator (:to :mount)))
+    (desig-prop ?motion-designator (:agent ?robot-name)))
+
+  (<- (motion-desig ?motion-designator (mount ?robot-name NIL))
+    (or (desig-prop ?motion-designator (:type :unmounting))
+        (desig-prop ?motion-designator (:to :unmount)))
     (desig-prop ?motion-designator (:agent ?robot-name))))
