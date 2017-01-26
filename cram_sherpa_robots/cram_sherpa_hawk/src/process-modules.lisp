@@ -27,15 +27,32 @@
 ;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ;;; POSSIBILITY OF SUCH DAMAGE.
 
-(in-package :red-wasp)
+(in-package :hawk)
 
-(def-fact-group red-wasp-motions (desig:motion-desig)
+(def-fact-group hawk-pms (cpm:matching-process-module
+                          cpm:available-process-module)
 
-  (<- (desig:motion-desig ?motion-designator (switch-beacon ?on-or-off))
+  (<- (cpm:matching-process-module ?motion-designator hawk-sensors)
     (or (desig:desig-prop ?motion-designator (:type :switching))
         (desig:desig-prop ?motion-designator (:to :switch)))
-    (desig:desig-prop ?motion-designator (:device :beacon))
-    (or (and (desig:desig-prop ?motion-designator (:state :on))
-             (equal ?on-or-off T))
-        (and (desig:desig-prop ?motion-designator (:state :off))
-             (equal ?on-or-off NIL)))))
+    (desig:desig-prop ?motion-designator (:device :camera)))
+
+  (<- (cpm:matching-process-module ?motion-designator hawk-sensors)
+    (or (desig:desig-prop ?motion-designator (:type :taking-picture))
+        (desig:desig-prop ?motion-designator (:to :take-picture))))
+
+  (<- (cpm:available-process-module hawk-sensors)
+    (not (cpm:projection-running ?_))))
+
+
+(cpm:def-process-module hawk-sensors (motion-designator)
+  (destructuring-bind (command argument) (desig:reference motion-designator)
+    (ecase command
+      (switch-camera
+       (handler-case
+           (call-toggle-camera-action
+            :action-goal (cram-sherpa-robots-common:make-toggle-actuator-goal argument))))
+      (take-picture
+       (handler-case
+           (call-take-picture-action
+            :action-goal (cram-sherpa-robots-common:make-take-picture-goal 'hawk)))))))

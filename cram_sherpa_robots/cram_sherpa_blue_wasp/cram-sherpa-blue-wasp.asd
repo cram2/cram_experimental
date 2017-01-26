@@ -43,4 +43,5 @@
     ((:file "package")
      (:file "description" :depends-on ("package"))
      (:file "low-level" :depends-on ("package"))
-     (:file "designators" :depends-on ("package"))))))
+     (:file "designators" :depends-on ("package"))
+     (:file "process-modules" :depends-on ("package" "designators"))))))

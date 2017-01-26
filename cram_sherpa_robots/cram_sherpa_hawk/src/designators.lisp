@@ -27,15 +27,19 @@
 ;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ;;; POSSIBILITY OF SUCH DAMAGE.
 
-(in-package :red-wasp)
+(in-package :hawk)
 
-(def-fact-group red-wasp-motions (desig:motion-desig)
+(def-fact-group hawk-motions (desig:motion-desig)
 
-  (<- (desig:motion-desig ?motion-designator (switch-beacon ?on-or-off))
+  (<- (desig:motion-desig ?motion-designator (switch-camera ?on-or-off))
     (or (desig:desig-prop ?motion-designator (:type :switching))
         (desig:desig-prop ?motion-designator (:to :switch)))
-    (desig:desig-prop ?motion-designator (:device :beacon))
+    (desig:desig-prop ?motion-designator (:device :camera))
     (or (and (desig:desig-prop ?motion-designator (:state :on))
              (equal ?on-or-off T))
         (and (desig:desig-prop ?motion-designator (:state :off))
-             (equal ?on-or-off NIL)))))
+             (equal ?on-or-off NIL))))
+
+  (<- (desig:motion-desig ?motion-designator (take-picture NIL))
+    (or (desig:desig-prop ?motion-designator (:type :taking-picture))
+        (desig:desig-prop ?motion-designator (:to :take-picture)))))

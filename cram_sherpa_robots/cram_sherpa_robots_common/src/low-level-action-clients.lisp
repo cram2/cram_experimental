@@ -168,9 +168,11 @@
    'sherpa_msgs-msg:SetAltitudeGoal
    :altitude altitude))
 
-(defun make-take-picture-goal ()
+(defun make-take-picture-goal (agent-name)
+  (declare (type symbol agent-name))
   (make-symbol-type-message
-   'sherpa_msgs-msg:TakePictureGoal))
+   'sherpa_msgs-msg:TakePictureGoal
+   :picture_id (format nil "~a_~f" agent-name (roslisp:ros-time))))
 
 (defun make-toggle-actuator-goal (on?-otherwise-off)
   (declare (type boolean on?-otherwise-off))

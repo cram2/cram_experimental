@@ -51,9 +51,9 @@
   (<- (motion-desig ?motion-designator (set-altitude ?altitude))
     (or (desig-prop ?motion-designator (:type :setting-altitude))
         (desig-prop ?motion-designator (:to :set-altitude)))
-    (or (desig-prop ?motion-designator (:value ?altitude)))
+    (or (desig-prop ?motion-designator (:value ?altitude))
         (and (desig-prop ?motion-designator (:to ?altitude))
-             (not (equal ?altitude :set-altitude)))))
+             (not (equal ?altitude :set-altitude))))))
 
 
 

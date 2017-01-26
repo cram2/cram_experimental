@@ -35,7 +35,27 @@
   (<- (cpm:matching-process-module ?motion-designator red-wasp-sensors)
     (or (desig:desig-prop ?motion-designator (:type :switching))
         (desig:desig-prop ?motion-designator (:to :switch)))
-    (desig-prop ?motion-designator (:device :beacon)))
+    (desig:desig-prop ?motion-designator (:device :beacon)))
 
   (<- (cpm:available-process-module red-wasp-sensors)
     (not (cpm:projection-running ?_))))
+
+
+(cpm:def-process-module red-wasp-sensors (motion-designator)
+  (destructuring-bind (command argument) (desig:reference motion-designator)
+    (ecase command
+      (switch-beacon
+       (handler-case
+           (call-toggle-beacon-action
+            :action-goal (cram-sherpa-robots-common:make-toggle-actuator-goal argument)))))))
+
+;; Examples:
+;;
+;; (cpm:with-process-modules-running
+;;     (red-wasp::red-wasp-sensors)
+;;   (cpl:top-level
+;;     (cram-sherpa-robots-common:perform
+;;      (desig:a motion
+;;               (to switch)
+;;               (device beacon)
+;;               (state on)))))

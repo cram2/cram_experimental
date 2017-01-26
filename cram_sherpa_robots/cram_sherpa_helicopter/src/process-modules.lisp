@@ -37,20 +37,66 @@
         (desig:desig-prop ?motion-designator (:to :fly))))
 
   (<- (cpm:matching-process-module ?motion-designator helicopter-actuators)
-    (or (desig:desig-prop ?motion-designator (:type :switching-engine))
-        (desig:desig-prop ?motion-designator (:to :switch-engine))))
+    (or (desig:desig-prop ?motion-designator (:type :switching))
+        (desig:desig-prop ?motion-designator (:to :switch)))
+    (desig-prop ?motion-designator (:device :engine)))
 
   (<- (cpm:matching-process-module ?motion-designator helicopter-actuators)
     (or (desig:desig-prop ?motion-designator (:type :setting-altitude))
         (desig:desig-prop ?motion-designator (:to :set-altitude))))
 
-  ;; (<- (cpm:matching-process-module ?motion-designator wasp-sensors)
-  ;;   (or (desig:desig-prop ?motion-designator (:type :switching-beacon))
-  ;;       (desig:desig-prop ?motion-designator (:to :switch-beacon))))
-
   (<- (cpm:available-process-module helicopter-actuators)
-    (not (cpm:projection-running ?_)))
+    (not (cpm:projection-running ?_))))
 
-  ;; (<- (cpm:available-process-module wasp-sensors)
-  ;;   (not (cpm:projection-running ?_)))
-  )
+(defun current-robot-package ()
+  (symbol-package
+   (cut:var-value '?r (car (prolog:prolog '(cram-robot-interfaces:robot ?r))))))
+
+(cpm:def-process-module helicopter-actuators (motion-designator)
+  (destructuring-bind (command argument) (reference motion-designator)
+    (ecase command
+      (fly
+       (handler-case
+           (funcall (symbol-function
+                     (intern (symbol-name '#:call-fly-action) (current-robot-package)))
+                    :action-goal (cram-sherpa-robots-common:make-move-to-goal argument))
+         ;; (cram-plan-failures:look-at-failed ()
+         ;;   (cpl:fail 'cram-plan-failures:look-at-failed :motion motion-designator))
+         ))
+      (switch-engine
+       (handler-case
+           (funcall (symbol-function
+                     (intern (symbol-name '#:call-toggle-engine-action) (current-robot-package)))
+                    :action-goal (cram-sherpa-robots-common:make-toggle-actuator-goal argument))))
+      (set-altitude
+       (handler-case
+           (funcall (symbol-function
+                     (intern (symbol-name '#:call-set-altitude-action) (current-robot-package)))
+                    :action-goal (cram-sherpa-robots-common:make-set-altitude-goal argument)))))))
+
+;; Examples:
+;;
+;; (cpm:with-process-modules-running
+;;     (helicopter::helicopter-actuators)
+;;            (cpl:top-level
+;;              (cram-sherpa-robots-common:perform
+;;               (desig:an motion
+;;                         (to fly)
+;;                         (to ((582.640 -302.901 185.935) (0 0 0 1)))))))
+;;
+;; (cpm:with-process-modules-running
+;;     (helicopter::helicopter-actuators)
+;;   (cpl:top-level
+;;     (cram-sherpa-robots-common:perform
+;;      (desig:an motion
+;;                (to switch)
+;;                (device engine)
+;;                (state on)))))
+;;
+;; (cpm:with-process-modules-running
+;;     (helicopter::helicopter-actuators)
+;;   (cpl:top-level
+;;     (cram-sherpa-robots-common:perform
+;;      (desig:an motion
+;;                (to set-altitude)
+;;                (to 5)))))

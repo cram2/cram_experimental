@@ -35,7 +35,24 @@
   (<- (cpm:matching-process-module ?motion-designator blue-wasp-sensors)
     (or (desig:desig-prop ?motion-designator (:type :switching))
         (desig:desig-prop ?motion-designator (:to :switch)))
-    (desig-prop ?motion-designator (:device :camera)))
+    (desig:desig-prop ?motion-designator (:device :camera)))
+
+  (<- (cpm:matching-process-module ?motion-designator blue-wasp-sensors)
+    (or (desig:desig-prop ?motion-designator (:type :taking-picture))
+        (desig:desig-prop ?motion-designator (:to :take-picture))))
 
   (<- (cpm:available-process-module blue-wasp-sensors)
     (not (cpm:projection-running ?_))))
+
+
+(cpm:def-process-module blue-wasp-sensors (motion-designator)
+  (destructuring-bind (command argument) (desig:reference motion-designator)
+    (ecase command
+      (switch-camera
+       (handler-case
+           (call-toggle-camera-action
+            :action-goal (cram-sherpa-robots-common:make-toggle-actuator-goal argument))))
+      (take-picture
+       (handler-case
+           (call-take-picture-action
+            :action-goal (cram-sherpa-robots-common:make-take-picture-goal 'blue-wasp)))))))
