@@ -87,8 +87,8 @@
 
   (<- (action-desig ?action-designator (navigate ?pose))
     (or (desig-prop ?action-designator (:type :going))
-        (desig-prop ?motion-designator (:to :go)))
+        (desig-prop ?action-designator (:to :go)))
     (or (desig-prop ?action-designator (:destination ?location))
-        (and (desig-prop ?motion-designator (:to ?location))
+        (and (desig-prop ?action-designator (:to ?location))
              (not (equal ?location :go))))
     (location-pose ?location ?pose)))

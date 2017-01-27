@@ -32,13 +32,31 @@
 (defpackage cram-sherpa-robots-common
   (:nicknames #:robots-common)
   (:use #:common-lisp #:cram-designators #:cram-process-modules #:cram-prolog)
-  (:export #:perform
-           #:location-pose
-           #:terrain-name #:terrain
-           #:define-action-client
-           #:make-mount-goal
-           #:make-move-to-goal
-           #:make-set-altitude-goal
-           #:make-take-picture-goal
-           #:make-toggle-actuator-goal
-           #:make-toggle-victim-tracking-goal))
+  (:export
+   ;; action-designator-server
+   #:main
+   #:run-reference-server
+   #:perform-with-pms-running
+   #:run-perform-server
+   ;; action-json-parser
+   #:*show-json-warnings*
+   #:json-key-not-supported
+   #:json-parser-failed
+   ;; low-level-action-clients
+   #:define-action-client
+   #:make-mount-goal
+   #:make-move-to-goal
+   #:make-set-altitude-goal
+   #:make-take-picture-goal
+   #:make-toggle-actuator-goal
+   #:make-toggle-victim-tracking-goal
+   ;; plan-library
+   #:perform
+   ;; prolog
+   #:location-pose
+   #:terrain-name #:terrain
+   ;; utils
+   #:try-reference-designator-json
+   #:current-robot-symbol
+   #:current-robot-package
+   #:current-robot-name))

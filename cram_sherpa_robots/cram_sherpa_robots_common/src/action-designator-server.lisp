@@ -29,43 +29,36 @@
 
 (in-package :robots-common)
 
-(defun try-reference-designator-json (designator-json-string)
-  (let (success designator grounding)
-    (handler-case
-        (progn (roslisp:ros-info
-                (robots-common reference-server)
-                "Designator resolved to: ~a"
-                (setf grounding (desig:reference
-                                 (setf designator (parse-action-json designator-json-string)))))
-               (setf success T))
+(defun main ()
+  (let ((agent-ros-name (rosify_ (current-robot-symbol))))
+    (unwind-protect
+         (progn
+           (roslisp-utilities:startup-ros :name agent-ros-name)
+           (run-reference-server agent-ros-name)
+           (run-perform-server agent-ros-name)
+           (roslisp:spin-until nil 100))
+      (roslisp-utilities:shutdown-ros))))
 
-      (desig:designator-error (error-object)
-        (roslisp:ros-error (robots-common reference-server)
-                           "Could not resolve designator: ~a"
-                           error-object))
-
-      (json-parser-failed (error-object)
-        (roslisp:ros-error (robots-common reference-server)
-                           "Could not parse JSON designator: ~a"
-                           error-object)))
-    (values success designator grounding)))
+;;;;;;;;;; referencing
 
 (roslisp:def-service-callback sherpa_msgs-srv:ReferenceDesignator (designator)
   (roslisp:ros-info (robots-common reference-server) "Referencing designator ~a" designator)
   (roslisp:make-response :success (try-reference-designator-json designator)))
 
-(defun run-reference-server (actor-namespace)
-  (roslisp:with-ros-node ((concatenate 'string
-                                       actor-namespace
-                                       "/designator_reference_server")
-                          :spin t)
-    (roslisp:register-service
-     (concatenate 'string
-                  actor-namespace
-                  "/reference_designator")
-     'sherpa_msgs-srv:ReferenceDesignator)
-    (roslisp:ros-info (robots-common reference-server) "Ready to reference designators.")))
+(defun run-reference-server (agent-namespace)
+  (roslisp:register-service
+   (concatenate 'string
+                agent-namespace
+                "/reference_designator")
+   'sherpa_msgs-srv:ReferenceDesignator)
+  (roslisp:ros-info (robots-common reference-server) "Ready to reference designators."))
 
+;;;;;;;;;;;; performing
+
+(defgeneric perform-with-pms-running (designator)
+  (:documentation "Each robot should define this function with its corresponding PMs.")
+  (:method (designator)
+    (cpl:fail "PERFORM-WITH-PMS-RUNNING is not defined for this robot. Please do!")))
 
 (roslisp:def-service-callback sherpa_msgs-srv:PerformDesignator (designator)
   (roslisp:ros-info (robots-common perform-server) "Performing action designator ~a" designator)
@@ -74,7 +67,7 @@
     (declare (ignore grounding))
     (if success
         (roslisp:make-response :ack (handler-case
-                                        (cram-sherpa-robots-common::perform parsed-designator)
+                                        (perform-with-pms-running parsed-designator)
                                       (cpl:plan-failure (error-object)
                                         (roslisp:ros-error (robots-common reference-server)
                                                            "Could not perform designator ~a: ~a"
@@ -82,14 +75,10 @@
                                         NIL)))
         (roslisp:make-response :ack NIL))))
 
-(defun run-perform-server (actor-namespace)
-  (roslisp:with-ros-node ((concatenate 'string
-                                       actor-namespace
-                                       "/perform_designator_server")
-                          :spin t)
-    (roslisp:register-service
-     (concatenate 'string
-                  actor-namespace
-                  "/perform_designator")
-     'sherpa_msgs-srv:PerformDesignator)
-    (roslisp:ros-info (robots-common perform-server) "Ready to reference designators.")))
+(defun run-perform-server (agent-namespace)
+  (roslisp:register-service
+   (concatenate 'string
+                agent-namespace
+                "/perform_designator")
+   'sherpa_msgs-srv:PerformDesignator)
+  (roslisp:ros-info (robots-common perform-server) "Ready to reference designators."))

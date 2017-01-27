@@ -31,5 +31,4 @@
 
 (def-fact-group donkey-metadata (cram-robot-interfaces:robot)
 
-  ;; (<- (cram-robot-interfaces:robot donkey))
-  )
+  (<- (cram-robot-interfaces:robot donkey)))

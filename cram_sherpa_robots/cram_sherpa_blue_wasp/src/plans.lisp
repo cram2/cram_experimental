@@ -1,5 +1,5 @@
 ;;;
-;;; Copyright (c) 2016, Gayane Kazhoyan <kazhoyan@cs.uni-bremen.de>
+;;; Copyright (c) 2017, Gayane Kazhoyan <kazhoyan@cs.uni-bremen.de>
 ;;; All rights reserved.
 ;;;
 ;;; Redistribution and use in source and binary forms, with or without
@@ -27,5 +27,15 @@
 ;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ;;; POSSIBILITY OF SUCH DAMAGE.
 
-(in-package :donkey)
+(in-package :blue-wasp)
 
+(defmethod perform-with-pms-running ((designator desig:action-designator))
+  (cpm:with-process-modules-running
+      (blue-wasp-sensors helicopter:helicopter-actuators)
+    (cpl:top-level
+      (perform designator))))
+
+;; (defun search-for-victim (?where)
+;;   (perform (desig:a motion (to switch) (device camera) (state on)))
+;;   (find-victim)
+;;   (land-or-whatever))

@@ -36,7 +36,9 @@
                cram-prolog
                cram-designators
                cram-sherpa-robots-common
-               cram-tf)
+               cram-tf
+               roslisp ; for add_lisp_executable
+               )
 
   :components
   ((:module "src"
@@ -46,5 +48,4 @@
      (:file "low-level" :depends-on ("package"))
      (:file "designators" :depends-on ("package"))
      (:file "process-modules" :depends-on ("package" "low-level" "designators"))
-     (:file "plans" :depends-on ("package"))
-     (:file "ros" :depends-on ("package"))))))
+     (:file "plans" :depends-on ("package" "process-modules" "designators"))))))

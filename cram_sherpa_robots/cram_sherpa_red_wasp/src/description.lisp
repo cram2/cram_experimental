@@ -31,5 +31,4 @@
 
 (def-fact-group red-wasp-metadata (cram-robot-interfaces:robot)
 
-  ;; (<- (cram-robot-interfaces:robot red-wasp))
-  )
+  (<- (cram-robot-interfaces:robot red-wasp)))

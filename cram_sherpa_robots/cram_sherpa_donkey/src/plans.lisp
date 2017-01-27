@@ -29,6 +29,16 @@
 
 (in-package :donkey)
 
-(defun go-somewhere (?where)
-  (cram-sherpa-robots-common::perform (desig:a motion (to go) (to ?where))))
+(defmethod perform-with-pms-running ((designator action-designator))
+  (cpm:with-process-modules-running
+      (donkey-navigation donkey-manipulation)
+    (cpl:top-level
+      (perform designator))))
 
+(defun navigate (?where)
+  (perform (desig:a motion (to drive) (to ?where))))
+
+(defun mount (?whom mount?-otherwise-unmount)
+  (if mount?-otherwise-unmount
+      (perform (desig:a motion (to mount) (agent ?whom)))
+      (perform (desig:a motion (to unmount) (agent ?whom)))))

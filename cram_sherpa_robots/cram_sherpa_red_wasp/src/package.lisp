@@ -32,4 +32,6 @@
 (defpackage cram-sherpa-red-wasp
   (:nicknames #:red-wasp)
   (:use #:common-lisp #:cram-prolog #:cram-sherpa-robots-common)
-  (:export #:red-wasp))
+  (:export #:red-wasp
+           #:main ; for add_lisp_executable, comes from robots-common
+           ))

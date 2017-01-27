@@ -40,12 +40,12 @@
   (when ?pose
     (perform (a motion (to fly) (to ?pose))))
   (perform (a motion (to set-altitude) (to 0)))
-  (perform (a motion (to switch-engine) (state off))))
+  (perform (a motion (to switch) (device engine) (state off))))
 
 (defun take-off (?altitude)
   (declare (type number ?altitude))
   (format t "take-off ~a~%" ?altitude)
-  (perform (a motion (to switch-engine) (state on)))
+  (perform (a motion (to switch) (device engine) (state on)))
   (perform (a motion (to set-altitude) (to ?altitude))))
 
 (defun calculate-area-via-points (area delta)
@@ -89,10 +89,11 @@ E.g. (#<3D-VECTOR (d w h)> #<POSE-STAMPED ('frame' stamp (x y z) (q1 q2 q3 w))>)
   ;; TODO
   )
 
-(defparameter *navigation-altitude* 2
+(defparameter *navigation-altitude* 5
   "In meters. Will be changed into a Prolog rule.")
 
 (defun navigate (?location)
   (format t "go ~a~%" ?location)
-  (perform (an action (to take-off) (to *navigation-altitude*)))
+  (let ((?altitude *navigation-altitude*))
+    (perform (an action (to take-off) (to ?altitude))))
   (perform (a motion (to fly) (to ?location))))

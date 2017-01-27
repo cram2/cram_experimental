@@ -1,5 +1,5 @@
 ;;;
-;;; Copyright (c) 2016, Gayane Kazhoyan <kazhoyan@cs.uni-bremen.de>
+;;; Copyright (c) 2017, Gayane Kazhoyan <kazhoyan@cs.uni-bremen.de>
 ;;; All rights reserved.
 ;;;
 ;;; Redistribution and use in source and binary forms, with or without
@@ -27,24 +27,15 @@
 ;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ;;; POSSIBILITY OF SUCH DAMAGE.
 
-(defsystem cram-sherpa-hawk
-  :author "Gayane Kazhoyan"
-  :maintainer "Gayane Kazhoyan"
-  :license "BSD"
+(in-package :hawk)
 
-  :depends-on (cram-sherpa-helicopter
-               cram-prolog
-               cram-robot-interfaces
-               cram-sherpa-robots-common
-               roslisp ; for add_lisp_executable
-               )
+(defmethod perform-with-pms-running ((designator desig:action-designator))
+  (cpm:with-process-modules-running
+      (hawk-sensors helicopter:helicopter-actuators)
+    (cpl:top-level
+      (perform designator))))
 
-  :components
-  ((:module "src"
-    :components
-    ((:file "package")
-     (:file "low-level" :depends-on ("package"))
-     (:file "description" :depends-on ("package"))
-     (:file "designators" :depends-on ("package"))
-     (:file "process-modules" :depends-on ("package" "low-level" "designators"))
-     (:file "plans" :depends-on ("package" "process-modules" "designators"))))))
+;; (defun search-for-victim (?where)
+;;   (perform (desig:a motion (to switch) (device camera) (state on)))
+;;   (find-victim)
+;;   (land-or-whatever))

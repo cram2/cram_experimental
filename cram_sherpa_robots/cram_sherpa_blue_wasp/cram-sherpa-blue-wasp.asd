@@ -35,7 +35,9 @@
   :depends-on (cram-sherpa-helicopter
                cram-prolog
                cram-robot-interfaces
-               cram-sherpa-robots-common)
+               cram-sherpa-robots-common
+               roslisp ; for add_lisp_executable
+               )
 
   :components
   ((:module "src"
@@ -44,4 +46,5 @@
      (:file "description" :depends-on ("package"))
      (:file "low-level" :depends-on ("package"))
      (:file "designators" :depends-on ("package"))
-     (:file "process-modules" :depends-on ("package" "designators"))))))
+     (:file "process-modules" :depends-on ("package" "low-level" "designators"))
+     (:file "plans" :depends-on ("package" "process-modules" "designators"))))))

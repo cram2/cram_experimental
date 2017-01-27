@@ -49,3 +49,24 @@
     (or (desig-prop ?motion-designator (:type :unmounting))
         (desig-prop ?motion-designator (:to :unmount)))
     (desig-prop ?motion-designator (:agent ?robot-name))))
+
+
+(def-fact-group donkey-actions (action-desig)
+
+  (<- (action-desig ?action-designator (mount ?robot-name T))
+    (or (desig-prop ?action-designator (:type :mounting))
+        (desig-prop ?action-designator (:to :mount)))
+    (desig-prop ?action-designator (:agent ?robot-name)))
+
+  (<- (action-desig ?action-designator (mount ?robot-name NIL))
+    (or (desig-prop ?action-designator (:type :unmounting))
+        (desig-prop ?action-designator (:to :unmount)))
+    (desig-prop ?action-designator (:agent ?robot-name)))
+
+  (<- (action-desig ?action-designator (navigate ?pose))
+    (or (desig-prop ?action-designator (:type :going))
+        (desig-prop ?action-designator (:to :go)))
+    (or (desig-prop ?action-designator (:destination ?location))
+        (and (desig-prop ?action-designator (:to ?location))
+             (not (equal ?location :go))))
+    (location-pose ?location ?pose)))

@@ -31,5 +31,4 @@
 
 (def-fact-group blue-wasp-metadata (cram-robot-interfaces:robot)
 
-  ;; (<- (cram-robot-interfaces:robot blue-wasp))
-  )
+  (<- (cram-robot-interfaces:robot blue-wasp)))

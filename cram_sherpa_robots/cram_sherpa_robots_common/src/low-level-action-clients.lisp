@@ -29,34 +29,6 @@
 
 (in-package :robots-common)
 
-(defun action-type-class-name (action-type)
-  (declare (type string action-type))
-  "partly taken from roslisp implementation of MAKE-MESSAGE-FN"
-  (destructuring-bind (pkg-name type)
-      (roslisp-utils:tokens (string-upcase (actionlib::action-msg-type action-type "Goal"))
-                            :separators '(#\/))
-    (let ((pkg (find-package (intern (concatenate 'string pkg-name "-MSG") 'keyword))))
-      (assert pkg nil "Can't find package ~a-MSG" pkg-name)
-      (let ((class-name (find-symbol type pkg)))
-        (assert class-name nil "Can't find class for ~a" action-type)
-        class-name))))
-
-(defun rosify_ (lispy-symbol)
-  (declare (type symbol lispy-symbol))
-  "taken from cram_json_prolog PROLOGIFY function"
-  (flet ((contains-lower-case-char (symbol)
-           (and
-            (find-if (lambda (ch)
-                       (let ((lch (char-downcase ch)))
-                         (and (find lch "abcdefghijklmnopqrstuvwxyz")
-                              (eq lch ch))))
-                     (symbol-name symbol))
-            t)))
-    (if (contains-lower-case-char lispy-symbol)
-        (string lispy-symbol)
-        (string-downcase (substitute #\_ #\- (copy-seq (string lispy-symbol)))))))
-
-
 (defmacro define-action-client (agent-name name type timeout)
   "Creates this and that."
   (let* ((package (symbol-package name))

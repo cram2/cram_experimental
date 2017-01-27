@@ -48,10 +48,6 @@
   (<- (cpm:available-process-module helicopter-actuators)
     (not (cpm:projection-running ?_))))
 
-(defun current-robot-package ()
-  (symbol-package
-   (cut:var-value '?r (car (prolog:prolog '(cram-robot-interfaces:robot ?r))))))
-
 (cpm:def-process-module helicopter-actuators (motion-designator)
   (destructuring-bind (command argument) (reference motion-designator)
     (ecase command
@@ -59,7 +55,7 @@
        (handler-case
            (funcall (symbol-function
                      (intern (symbol-name '#:call-fly-action) (current-robot-package)))
-                    :action-goal (cram-sherpa-robots-common:make-move-to-goal argument))
+                    :action-goal (make-move-to-goal argument))
          ;; (cram-plan-failures:look-at-failed ()
          ;;   (cpl:fail 'cram-plan-failures:look-at-failed :motion motion-designator))
          ))
@@ -67,12 +63,12 @@
        (handler-case
            (funcall (symbol-function
                      (intern (symbol-name '#:call-toggle-engine-action) (current-robot-package)))
-                    :action-goal (cram-sherpa-robots-common:make-toggle-actuator-goal argument))))
+                    :action-goal (make-toggle-actuator-goal argument))))
       (set-altitude
        (handler-case
            (funcall (symbol-function
                      (intern (symbol-name '#:call-set-altitude-action) (current-robot-package)))
-                    :action-goal (cram-sherpa-robots-common:make-set-altitude-goal argument)))))))
+                    :action-goal (make-set-altitude-goal argument)))))))
 
 ;; Examples:
 ;;

@@ -32,4 +32,6 @@
 (defpackage cram-sherpa-hawk
   (:nicknames #:hawk)
   (:use #:common-lisp #:cram-prolog #:cram-sherpa-robots-common)
-  (:export #:hawk))
+  (:export #:hawk
+           #:main ; for add_lisp_executable, comes from robots-common
+           ))

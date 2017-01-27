@@ -31,5 +31,4 @@
 
 (def-fact-group hawk-metadata (cram-robot-interfaces:robot)
 
-  ;; (<- (cram-robot-interfaces:robot hawk))
-  )
+  (<- (cram-robot-interfaces:robot hawk)))
