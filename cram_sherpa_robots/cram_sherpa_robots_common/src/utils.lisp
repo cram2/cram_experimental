@@ -88,3 +88,18 @@
     (if (contains-lower-case-char lispy-symbol)
         (string lispy-symbol)
         (string-downcase (substitute #\_ #\- (copy-seq (string lispy-symbol)))))))
+
+
+
+(defmacro make-symbol-type-message (msg-type-as-symbol &rest args)
+  "Same as roslisp:make-message only better"
+  `(roslisp::set-fields-fn
+    (make-instance ,msg-type-as-symbol)
+    ,@(loop
+        for i from 0
+        for arg in args
+        collect (if (evenp i)
+                    `',(mapcar
+                        #'roslisp::convert-to-keyword
+                        (roslisp::designated-list arg))
+                    arg))))

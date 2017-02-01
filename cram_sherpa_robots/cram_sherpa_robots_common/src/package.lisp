@@ -59,4 +59,6 @@
    #:try-reference-designator-json
    #:current-robot-symbol
    #:current-robot-package
-   #:current-robot-name))
+   #:current-robot-name
+   #:rosify_
+   #:make-symbol-type-message))

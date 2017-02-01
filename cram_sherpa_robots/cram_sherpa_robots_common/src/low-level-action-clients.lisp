@@ -50,16 +50,27 @@
        (defun ,init-function-name ()
          (setf ,action-var-name (actionlib:make-action-client ,ros-name ,type))
          (loop until (actionlib:wait-for-server ,action-var-name 5.0)
-               do (roslisp:ros-info (ptu-action-client)
+               do (roslisp:ros-info (robots-common action-client)
                                     "Waiting for ~a action server..." ',name))
+         ;; (dotimes (seconds 5) ; give the client some time to settle down
+         ;;     (roslisp:ros-info (robots-common action-client)
+         ;;                       "Goal subscribers: ~a~%"
+         ;;                       (mapcar (lambda (connection)
+         ;;                                 (roslisp::subscriber-uri connection))
+         ;;                               (roslisp::subscriber-connections
+         ;;                                (actionlib::goal-pub ,action-var-name))))
+         ;;     (cpl:sleep 1))
          (roslisp:ros-info (robots-common action-client)
-                           "~a action client created." ',name)
+                           "~a action client created."  ',name)
          ,action-var-name)
 
        (defun ,destroy-function-name ()
          (setf ,action-var-name nil))
 
        (roslisp-utilities:register-ros-cleanup-function ,destroy-function-name)
+       ;; (roslisp-utilities:register-ros-init-function ,init-function-name)
+       ;; The init function is necessary because there is a bug when
+       ;; nodes don't subscribe to a publisher started from a terminal executable
 
        (defun ,getter-function-name ()
          (or ,action-var-name (,init-function-name)))
@@ -67,6 +78,8 @@
        (defun ,call-function-name (&key action-goal action-timeout)
          (declare (type (or null ,(action-type-class-name type)) action-goal)
                   (type (or null number) action-timeout))
+         (roslisp:ros-info (robots-common action-client)
+                           "Calling ~a with goal:~%~a" ',call-function-name action-goal)
          (unless action-timeout
            (setf action-timeout ,param-name))
          (cpl:with-failure-handling
@@ -104,19 +117,6 @@
             take_picture    TakePictureAction
             detect_victim   ToggleVictimTrackingAction
 )
-
-(defmacro make-symbol-type-message (msg-type-as-symbol &rest args)
-  "Same as roslisp:make-message only better"
-  `(roslisp::set-fields-fn
-    (make-instance ,msg-type-as-symbol)
-    ,@(loop
-        for i from 0
-        for arg in args
-        collect (if (evenp i)
-                    `',(mapcar
-                        #'roslisp::convert-to-keyword
-                        (roslisp::designated-list arg))
-                    arg))))
 
 (defun make-mount-goal (target-name mount?-otherwise-unmount)
   (declare (type (or symbol string) target-name)
