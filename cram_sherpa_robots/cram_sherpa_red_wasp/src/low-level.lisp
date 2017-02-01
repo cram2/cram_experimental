@@ -38,3 +38,5 @@
 (define-action-client red-wasp set-altitude "sherpa_msgs/SetAltitudeAction" 5)
 (define-action-client red-wasp toggle-engine "sherpa_msgs/ToggleActuatorAction" 5)
 (define-action-client red-wasp toggle-beacon "sherpa_msgs/ToggleActuatorAction" 5)
+
+

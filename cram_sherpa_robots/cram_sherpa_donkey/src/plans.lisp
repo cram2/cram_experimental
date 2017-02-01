@@ -29,7 +29,7 @@
 
 (in-package :donkey)
 
-(defmethod perform-with-pms-running ((designator action-designator))
+(defmethod perform-with-pms-running ((designator desig:designator))
   (cpm:with-process-modules-running
       (donkey-navigation donkey-manipulation)
     (cpl:top-level

@@ -29,7 +29,7 @@
 
 (in-package :blue-wasp)
 
-(defmethod perform-with-pms-running ((designator desig:action-designator))
+(defmethod perform-with-pms-running ((designator desig:designator))
   (cpm:with-process-modules-running
       (blue-wasp-sensors helicopter:helicopter-actuators)
     (cpl:top-level

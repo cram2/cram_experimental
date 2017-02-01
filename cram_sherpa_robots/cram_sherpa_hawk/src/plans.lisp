@@ -29,7 +29,7 @@
 
 (in-package :hawk)
 
-(defmethod perform-with-pms-running ((designator desig:action-designator))
+(defmethod perform-with-pms-running ((designator desig:designator))
   (cpm:with-process-modules-running
       (hawk-sensors helicopter:helicopter-actuators)
     (cpl:top-level
