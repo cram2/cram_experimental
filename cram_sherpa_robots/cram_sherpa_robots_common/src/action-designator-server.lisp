@@ -60,25 +60,60 @@
   (:method (designator)
     (cpl:fail "PERFORM-WITH-PMS-RUNNING is not defined for this robot. Please do!")))
 
-(roslisp:def-service-callback sherpa_msgs-srv:PerformDesignator (designator)
+(actionlib:def-exec-callback perform-server-callback (designator)
   (roslisp:ros-info (robots-common perform-server) "Performing action designator ~a" designator)
-  (multiple-value-bind (success parsed-designator grounding)
-      (try-reference-designator-json designator)
-    (declare (ignore grounding))
-    (if success
-        (roslisp:make-response :ack (handler-case
-                                        (perform-with-pms-running parsed-designator)
-                                      (cpl:plan-failure (error-object)
-                                        (roslisp:ros-error (robots-common reference-server)
-                                                           "Could not perform designator ~a: ~a"
-                                                           parsed-designator error-object)
-                                        NIL)))
-        (roslisp:make-response :ack NIL))))
+  (handler-case
+      (multiple-value-bind (success parsed-designator grounding)
+          (try-reference-designator-json designator)
+        (declare (ignore grounding))
+        (unless success
+          (actionlib:abort-current :result
+                                   (format nil
+                                           "Designator ~a could not be referenced."
+                                           designator)))
+        (let ((worker-thread nil)
+              (result nil))
+          (unwind-protect
+               (progn
+                 (setf worker-thread
+                       (sb-thread:make-thread
+                        (lambda ()
+                          (handler-case
+                              (setf result (perform-with-pms-running parsed-designator))
+                            ;; (cpl:plan-failure (error-object)
+                            ;;   (roslisp:ros-error (robots-common reference-server)
+                            ;;                      "Could not perform designator ~a: ~a"
+                            ;;                      parsed-designator error-object)
+                            ;;   (setf result error-object))
+                            (condition (error-object)
+                              (setf result error-object))))))
+                 (roslisp:loop-at-most-every 0.1
+                   (when (actionlib:cancel-request-received)
+                     (actionlib:abort-current))
+                   (unless (sb-thread:thread-alive-p worker-thread)
+                     (typecase result
+                       (condition
+                        (actionlib:abort-current :result (format nil "Could not perform designator ~a: ~a"
+                                                                 parsed-designator result)))
+                       (t (actionlib:succeed-current :result (format nil "~a" result)))))))
+            (when (and worker-thread (sb-thread:thread-alive-p worker-thread))
+              (maphash #'(lambda (tree-name task-tree)
+                           (declare (ignore tree-name))
+                           (let* ((code (cpl:task-tree-node-effective-code
+                                         (cdr (car (cpl:task-tree-node-children task-tree))))))
+                             (assert code () "Task tree node doesn't contain a CODE.")
+                             (assert (cpl:code-task code) () "Task tree code empty.")
+                             (cpl:evaporate (cpl:code-task code))))
+                       cpl-impl::*top-level-task-trees*)))))
+    (error (error-object)
+      (actionlib:abort-current :result (format nil "~a" error-object)))))
 
 (defun run-perform-server (agent-namespace)
-  (roslisp:register-service
+  (actionlib:start-action-server
    (concatenate 'string
                 agent-namespace
                 "/perform_designator")
-   'sherpa_msgs-srv:PerformDesignator)
-  (roslisp:ros-info (robots-common perform-server) "Ready to reference designators."))
+   "sherpa_msgs/PerformDesignatorAction"
+   #'perform-server-callback
+   :separate-thread t)
+  (roslisp:ros-info (robots-common perform-server) "Ready to perform designators."))
