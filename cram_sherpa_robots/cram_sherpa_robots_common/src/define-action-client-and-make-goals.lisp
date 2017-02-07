@@ -94,6 +94,8 @@
               :timeout action-timeout)))))))
 
 
+; /RoboSherlock/sherpa_color_object/goal
+
 #+hohohohoandabottleofrum
 (
  /donkey/mount  sherpa_msgs/MountAction
