@@ -47,6 +47,7 @@
 ;               geometry_msgs-msg ; to represent poses, currently using cl-trans-stamped
                cl-transforms-stamped
                roslisp-utilities ; for starting a node
+               iai_robosherlock_msgs-msg ; for communicating to robosherlock
                )
 
   :components
@@ -58,4 +59,5 @@
      (:file "action-json-parser" :depends-on ("package"))
      (:file "utils" :depends-on ("package"))
      (:file "action-designator-server" :depends-on ("package" "action-json-parser" "utils"))
-     (:file "low-level-action-clients" :depends-on ("package" "utils"))))))
+     (:file "define-action-client-and-make-goals" :depends-on ("package" "utils"))
+     (:file "robosherlock-action" :depends-on ("package" "plan-library"))))))

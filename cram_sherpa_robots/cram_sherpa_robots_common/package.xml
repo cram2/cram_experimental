@@ -23,6 +23,7 @@
   <!-- <depend>geometry_msgs</depend> -->
   <depend>cl_transforms_stamped</depend>
   <depend>roslisp_utilities</depend>
+  <depend>iai_robosherlock_msgs</depend>
   <!-- <depend>cl_transforms</depend> -->
   <!-- <depend>cl_tf</depend> -->
   <!-- <depend>alexandria</depend> -->
