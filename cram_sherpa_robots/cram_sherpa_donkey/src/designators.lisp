@@ -32,13 +32,12 @@
 (def-fact-group donkey-motions (desig:motion-desig)
 
   (<- (motion-desig ?motion-designator (drive ?pose))
-    (or
-     (and (desig-prop ?motion-designator (:type :driving))
-          (desig-prop ?motion-designator (:destination ?location)))
-     (and (desig-prop ?motion-designator (:to :drive))
-          (desig-prop ?motion-designator (:to ?location))
-          (not (equal ?location :drive))))
-    (cram-sherpa-robots-common:location-pose ?location ?pose))
+    (or (desig-prop ?motion-designator (:type :driving))
+        (desig-prop ?motion-designator (:to :drive)))
+    (or (and (desig-prop ?motion-designator (:to ?location))
+             (not (equal ?location :drive)))
+        (desig-prop ?motion-designator (:destination ?location)))
+    (location-pose ?location ?pose))
 
   (<- (motion-desig ?motion-designator (mount ?robot-name T))
     (or (desig-prop ?motion-designator (:type :mounting))
