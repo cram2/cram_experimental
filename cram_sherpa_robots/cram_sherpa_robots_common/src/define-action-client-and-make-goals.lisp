@@ -82,16 +82,21 @@
                            "Calling ~a with goal:~%~a" ',call-function-name action-goal)
          (unless action-timeout
            (setf action-timeout ,param-name))
-         (cpl:with-failure-handling
-             ((simple-error (e)
-                (format t "Actionlib error occured!~%~a~%Reinitializing...~%~%" e)
-                (,init-function-name)
-                (cpl:retry)))
-           (let ((actionlib:*action-server-timeout* 10.0))
-             (actionlib:call-goal
-              (,getter-function-name)
-              action-goal
-              :timeout action-timeout)))))))
+         (multiple-value-bind (result status)
+               (cpl:with-failure-handling
+                   ((simple-error (e)
+                      (format t "Actionlib error occured!~%~a~%Reinitializing...~%~%" e)
+                      (,init-function-name)
+                      (cpl:retry)))
+                 (let ((actionlib:*action-server-timeout* 10.0))
+                   (actionlib:call-goal
+                    (,getter-function-name)
+                    action-goal
+                    :timeout action-timeout)))
+           (roslisp:ros-info (robots-common action-client)
+                             "Done with ~a with status ~a and result:~%~a"
+                             ',call-function-name status result)
+           result)))))
 
 
 ; /RoboSherlock/sherpa_color_object/goal
@@ -146,7 +151,7 @@
   (declare (type symbol agent-name))
   (make-symbol-type-message
    'sherpa_msgs-msg:TakePictureGoal
-   :picture_id (format nil "~a_~f" agent-name (roslisp:ros-time))))
+   :picture_id (format nil "~a_~f" (rosify_ agent-name) (roslisp:ros-time))))
 
 (defun make-toggle-actuator-goal (on?-otherwise-off)
   (declare (type boolean on?-otherwise-off))

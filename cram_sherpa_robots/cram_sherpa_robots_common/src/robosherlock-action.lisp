@@ -67,8 +67,8 @@
 (defun get-robosherlock-action-client ()
   (or *robosherlock-action-client* (init-robosherlock-action-client)))
 
-(defun call-robosherlock-action (object-name action-timeout)
-  (declare (type string object-type)
+(defun call-robosherlock-action (object-name &optional action-timeout)
+  (declare (type string object-name)
            (type (or null number) action-timeout))
   (roslisp:ros-info (robots-common robosherlock-client)
                     "Calling CALL-ROBOSHERLOCK-ACTION with object ~a" object-name)

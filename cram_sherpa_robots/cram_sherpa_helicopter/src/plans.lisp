@@ -35,7 +35,7 @@
 ;;; Might as well use def-cram-function-s but they're not as convenient
 
 (defun land (?pose)
-  (declare (type cl-transforms-stamped:pose-stamped ?pose))
+  (declare (type (or null cl-transforms-stamped:pose-stamped) ?pose))
   (format t "land ~a~%" ?pose)
   (when ?pose
     (perform (a motion (to fly) (to ?pose))))
