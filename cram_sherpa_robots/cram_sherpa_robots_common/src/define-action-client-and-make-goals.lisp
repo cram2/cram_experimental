@@ -49,9 +49,11 @@
 
        (defun ,init-function-name ()
          (setf ,action-var-name (actionlib:make-action-client ,ros-name ,type))
-         (loop until (actionlib:wait-for-server ,action-var-name 5.0)
+         (loop until (and ,action-var-name
+                          (actionlib:wait-for-server ,action-var-name 5.0))
                do (roslisp:ros-info (robots-common action-client)
-                                    "Waiting for ~a action server..." ',name))
+                                    "Waiting for ~a action server..." ',name)
+               unless ,action-var-name do (return))
          ;; (dotimes (seconds 5) ; give the client some time to settle down
          ;;     (roslisp:ros-info (robots-common action-client)
          ;;                       "Goal subscribers: ~a~%"
@@ -60,8 +62,11 @@
          ;;                               (roslisp::subscriber-connections
          ;;                                (actionlib::goal-pub ,action-var-name))))
          ;;     (cpl:sleep 1))
-         (roslisp:ros-info (robots-common action-client)
-                           "~a action client created."  ',name)
+         (if ,action-var-name
+             (roslisp:ros-info (robots-common action-client)
+                               "~a action client created."  ',name)
+             (roslisp:ros-info (robots-common action-client)
+                               "Waiting for ~a action client cancelled." ',name))
          ,action-var-name)
 
        (defun ,destroy-function-name ()
@@ -82,21 +87,23 @@
                            "Calling ~a with goal:~%~a" ',call-function-name action-goal)
          (unless action-timeout
            (setf action-timeout ,param-name))
-         (multiple-value-bind (result status)
-               (cpl:with-failure-handling
-                   ((simple-error (e)
-                      (format t "Actionlib error occured!~%~a~%Reinitializing...~%~%" e)
-                      (,init-function-name)
-                      (cpl:retry)))
-                 (let ((actionlib:*action-server-timeout* 10.0))
-                   (actionlib:call-goal
-                    (,getter-function-name)
-                    action-goal
-                    :timeout action-timeout)))
-           (roslisp:ros-info (robots-common action-client)
-                             "Done with ~a with status ~a and result:~%~a"
-                             ',call-function-name status result)
-           result)))))
+         (cpl:with-failure-handling
+             ((simple-error (e)
+                (format t "Actionlib error occured!~%~a~%Reinitializing...~%~%" e)
+                (,init-function-name)
+                (cpl:retry)))
+           (let ((actionlib:*action-server-timeout* 10.0)
+                 (client (,getter-function-name)))
+             (if client
+                 (multiple-value-bind (result status)
+                     (actionlib:call-goal client action-goal :timeout action-timeout)
+                   (roslisp:ros-info (robots-common action-client)
+                                     "Done with ~a with status ~a and result:~%~a"
+                                     ',call-function-name status result)
+                   result)
+                 (roslisp:ros-info (robots-common action-client)
+                                   "~a aborted because the client was destroyed."
+                                   ',call-function-name))))))))
 
 
 ; /RoboSherlock/sherpa_color_object/goal

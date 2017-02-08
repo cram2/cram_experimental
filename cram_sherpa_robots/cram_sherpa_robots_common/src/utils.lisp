@@ -57,7 +57,11 @@
       (json-parser-failed (error-object)
         (roslisp:ros-error (robots-common reference-server)
                            "Could not parse JSON designator: ~a"
-                           error-object)))
+                           error-object))
+
+      (error (error-object)
+        (roslisp:ros-error (robots-common reference-server)
+                           "Generic error happened: ~a.~%Please handle properly." error-object)))
     (values success designator grounding)))
 
 

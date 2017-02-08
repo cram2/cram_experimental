@@ -31,13 +31,20 @@
 
 (defun main ()
   (let ((agent-ros-name (rosify_ (current-robot-symbol))))
-    (unwind-protect
-         (progn
-           (roslisp-utilities:startup-ros :name agent-ros-name)
-           (run-reference-server agent-ros-name)
-           (run-perform-server agent-ros-name)
-           (roslisp:spin-until nil 100))
-      (roslisp-utilities:shutdown-ros))))
+    (let (perform-server-status-thread perform-server-callback-thread)
+      (unwind-protect
+           (progn
+             (roslisp-utilities:startup-ros :name agent-ros-name)
+             (run-reference-server agent-ros-name)
+             (multiple-value-setq
+                 (perform-server-status-thread perform-server-callback-thread)
+               (run-perform-server agent-ros-name))
+             (roslisp:spin-until nil 100))
+        (when (sb-thread:thread-alive-p perform-server-status-thread)
+          (sb-thread:terminate-thread perform-server-status-thread))
+        (when (sb-thread:thread-alive-p perform-server-callback-thread)
+          (sb-thread:terminate-thread perform-server-callback-thread))
+        (roslisp-utilities:shutdown-ros)))))
 
 ;;;;;;;;;; referencing
 
@@ -62,58 +69,60 @@
 
 (actionlib:def-exec-callback perform-server-callback (designator)
   (roslisp:ros-info (robots-common perform-server) "Performing action designator ~a" designator)
-  (handler-case
-      (multiple-value-bind (success parsed-designator grounding)
-          (try-reference-designator-json designator)
-        (declare (ignore grounding))
-        (unless success
-          (actionlib:abort-current :result
-                                   (format nil
-                                           "Designator ~a could not be referenced."
-                                           designator)))
-        (let ((worker-thread nil)
-              (result nil))
-          (unwind-protect
-               (progn
-                 (setf worker-thread
-                       (sb-thread:make-thread
-                        (lambda ()
-                          (handler-case
-                              (setf result (perform-with-pms-running parsed-designator))
-                            ;; (cpl:plan-failure (error-object)
-                            ;;   (roslisp:ros-error (robots-common reference-server)
-                            ;;                      "Could not perform designator ~a: ~a"
-                            ;;                      parsed-designator error-object)
-                            ;;   (setf result error-object))
-                            (condition (error-object)
-                              (setf result error-object))))))
-                 (roslisp:loop-at-most-every 0.1
-                   (when (actionlib:cancel-request-received)
-                     (actionlib:abort-current))
-                   (unless (sb-thread:thread-alive-p worker-thread)
-                     (typecase result
-                       (condition
-                        (actionlib:abort-current :result (format nil "Could not perform designator ~a: ~a"
-                                                                 parsed-designator result)))
-                       (t (actionlib:succeed-current :result (format nil "~a" result)))))))
-            (when (and worker-thread (sb-thread:thread-alive-p worker-thread))
-              (maphash #'(lambda (tree-name task-tree)
-                           (declare (ignore tree-name))
-                           (let* ((code (cpl:task-tree-node-effective-code
-                                         (cdr (car (cpl:task-tree-node-children task-tree))))))
-                             (assert code () "Task tree node doesn't contain a CODE.")
-                             (assert (cpl:code-task code) () "Task tree code empty.")
-                             (cpl:evaporate (cpl:code-task code))))
-                       cpl-impl::*top-level-task-trees*)))))
-    (error (error-object)
-      (actionlib:abort-current :result (format nil "~a" error-object)))))
+  (multiple-value-bind (success parsed-designator grounding)
+      (try-reference-designator-json designator)
+    (declare (ignore grounding))
+    (unless success
+      (actionlib:abort-current :result
+                               (format nil
+                                       "Designator ~a could not be referenced."
+                                       designator)))
+    (let ((worker-thread nil)
+          (result nil))
+      (unwind-protect
+           (progn
+             (setf worker-thread
+                   (sb-thread:make-thread
+                    (lambda ()
+                      (handler-case
+                          (setf result (perform-with-pms-running parsed-designator))
+                        ;; (cpl:plan-failure (error-object)
+                        ;;   (roslisp:ros-error (robots-common reference-server)
+                        ;;                      "Could not perform designator ~a: ~a"
+                        ;;                      parsed-designator error-object)
+                        ;;   (setf result error-object))
+                        (condition (error-object)
+                          (setf result error-object))))))
+             (roslisp:loop-at-most-every 0.1
+               (when (actionlib:cancel-request-received)
+                 (actionlib:abort-current))
+               (unless (sb-thread:thread-alive-p worker-thread)
+                 (typecase result
+                   (condition
+                    (actionlib:abort-current :result (format nil "Could not perform designator ~a: ~a"
+                                                             parsed-designator result)))
+                   (t (when (eq (roslisp:node-status) :RUNNING) ; in case one pressed Ctrl-C-C
+                        (actionlib:succeed-current :result (format nil "~a" result))))))))
+        (when (and worker-thread (sb-thread:thread-alive-p worker-thread))
+          (maphash #'(lambda (tree-name task-tree)
+                       (declare (ignore tree-name))
+                       (let* ((code (cpl:task-tree-node-effective-code
+                                     (cdr (car (cpl:task-tree-node-children task-tree))))))
+                         (assert code () "Task tree node doesn't contain a CODE.")
+                         (assert (cpl:code-task code) () "Task tree code empty.")
+                         (cpl:evaporate (cpl:code-task code))))
+                   cpl-impl::*top-level-task-trees*)
+          (sb-thread:terminate-thread worker-thread))))))
 
 (defun run-perform-server (agent-namespace)
-  (actionlib:start-action-server
-   (concatenate 'string
-                agent-namespace
-                "/perform_designator")
-   "sherpa_msgs/PerformDesignatorAction"
-   #'perform-server-callback
-   :separate-thread t)
-  (roslisp:ros-info (robots-common perform-server) "Ready to perform designators."))
+  (multiple-value-bind
+        (perform-server-status-thread perform-server-callback-thread)
+      (actionlib:start-action-server
+       (concatenate 'string
+                    agent-namespace
+                    "/perform_designator")
+       "sherpa_msgs/PerformDesignatorAction"
+       #'perform-server-callback
+       :separate-thread t)
+    (roslisp:ros-info (robots-common perform-server) "Ready to perform designators.")
+    (values perform-server-status-thread perform-server-callback-thread)))
