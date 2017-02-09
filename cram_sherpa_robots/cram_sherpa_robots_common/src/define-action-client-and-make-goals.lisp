@@ -158,7 +158,9 @@
   (declare (type symbol agent-name))
   (make-symbol-type-message
    'sherpa_msgs-msg:TakePictureGoal
-   :picture_id (format nil "~a_~f" (rosify_ agent-name) (roslisp:ros-time))))
+   :picture_id (format nil "~a_~d"
+                       (rosify_ agent-name)
+                       (floor (* (roslisp:ros-time) 1000000)))))
 
 (defun make-toggle-actuator-goal (on?-otherwise-off)
   (declare (type boolean on?-otherwise-off))
