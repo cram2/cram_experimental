@@ -31,7 +31,9 @@
 
 (defmethod perform-with-pms-running ((designator desig:designator))
   (cpm:with-process-modules-running
-      (hawk-sensors helicopter:helicopter-actuators)
+      (hawk-sensors
+       helicopter:helicopter-actuators
+       robots-common:robosherlock-pm)
     (cpl:top-level
       (perform designator))))
 
@@ -39,3 +41,6 @@
 ;;   (perform (desig:a motion (to switch) (device camera) (state on)))
 ;;   (find-victim)
 ;;   (land-or-whatever))
+
+(defun take-picture ()
+  (perform (desig:a motion (to take-picture))))

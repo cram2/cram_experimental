@@ -43,3 +43,9 @@
   (<- (desig:motion-desig ?motion-designator (take-picture NIL))
     (or (desig:desig-prop ?motion-designator (:type :taking-picture))
         (desig:desig-prop ?motion-designator (:to :take-picture)))))
+
+(def-fact-group blue-wasp-actions (desig:action-desig)
+
+  (<- (desig:action-desig ?action-designator (take-picture))
+    (or (desig:desig-prop ?action-designator (:type :taking-picture))
+        (desig:desig-prop ?action-designator (:to :take-picture)))))
