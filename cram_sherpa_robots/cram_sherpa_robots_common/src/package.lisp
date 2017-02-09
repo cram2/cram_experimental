@@ -55,6 +55,8 @@
    ;; prolog
    #:location-pose
    #:terrain-name #:terrain
+   ;; robosherlock-action
+   #:robosherlock-pm
    ;; utils
    #:try-reference-designator-json
    #:current-robot-symbol
