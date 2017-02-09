@@ -117,6 +117,13 @@ This is where the result of YASON:PARSE lands."
           (list name (car node)))
       (list name (intern (string-upcase (car node)) :keyword))))
 
+(defmethod parse-json-node ((name (eql :destination)) node)
+  (if (listp (car node))
+      (if (= 3 (length (car node)))
+          (list name (parse-designator-description (car node)))
+          (list name (car node)))
+      (list name (intern (string-upcase (car node)) :keyword))))
+
 ;;; LOCATION PROPERTIES
 
 (defmethod parse-json-node ((name (eql :of)) node)
