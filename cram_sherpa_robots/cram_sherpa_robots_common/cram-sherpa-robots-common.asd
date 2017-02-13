@@ -60,4 +60,5 @@
      (:file "utils" :depends-on ("package"))
      (:file "action-designator-server" :depends-on ("package" "action-json-parser" "utils"))
      (:file "define-action-client-and-make-goals" :depends-on ("package" "utils"))
-     (:file "robosherlock-action" :depends-on ("package" "plan-library"))))))
+     (:file "robosherlock-action" :depends-on ("package" "plan-library" "utils"))
+     (:file "logging" :depends-on ("package" "utils"))))))
