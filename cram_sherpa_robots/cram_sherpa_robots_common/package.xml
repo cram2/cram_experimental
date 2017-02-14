@@ -20,15 +20,9 @@
   <depend>cram_tf</depend>
   <depend>sherpa_msgs</depend>
   <depend>actionlib_lisp</depend>
-  <!-- <depend>geometry_msgs</depend> -->
   <depend>cl_transforms_stamped</depend>
   <depend>roslisp_utilities</depend>
   <depend>iai_robosherlock_msgs</depend>
-  <!-- <depend>cl_transforms</depend> -->
-  <!-- <depend>cl_tf</depend> -->
-  <!-- <depend>alexandria</depend> -->
-  <!-- <depend>cram_utilities</depend> -->
-  <!-- <depend>cram_robot_interfaces</depend> -->
-  <!-- <depend>cram_plan_failures</depend> -->
-  <!-- <depend>visualization_msgs</depend> -->
+  <depend>cram_json_prolog</depend>
+  <depend>cram_utilities</depend>
 </package>
