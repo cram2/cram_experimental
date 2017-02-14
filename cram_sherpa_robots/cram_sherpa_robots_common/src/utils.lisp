@@ -30,7 +30,11 @@
 (in-package :robots-common)
 
 (defun current-robot-symbol ()
-  (cut:var-value '?r (car (prolog:prolog '(cram-robot-interfaces:robot ?r)))))
+  (let ((robot-symbol
+          (cut:var-value '?r (car (prolog:prolog '(cram-robot-interfaces:robot ?r))))))
+    (if (cut:is-var robot-symbol)
+        NIL
+        robot-symbol)))
 
 (defun current-robot-package ()
   (symbol-package (current-robot-symbol)))
