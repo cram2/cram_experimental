@@ -74,20 +74,20 @@
                     "Calling CALL-ROBOSHERLOCK-ACTION with object ~a" object-name)
   (unless action-timeout
     (setf action-timeout *robosherlock-action-timeout*))
-  (multiple-value-bind (result status)
-      (cpl:with-failure-handling
-          ((simple-error (e)
-             (format t "Actionlib error occured!~%~a~%Reinitializing...~%~%" e)
-             (init-robosherlock-action-client)
-             (cpl:retry)))
-        (let ((actionlib:*action-server-timeout* 10.0))
-          (actionlib:call-goal
-           (get-robosherlock-action-client)
-           (robots-common:make-symbol-type-message
-            'iai_robosherlock_msgs-msg:HighlightObjectGoal
-            :obj_name object-name)
-           :timeout action-timeout)))
-    status))
+  (nth-value
+   1
+   (cpl:with-failure-handling
+       ((simple-error (e)
+          (format t "Actionlib error occured!~%~a~%Reinitializing...~%~%" e)
+          (init-robosherlock-action-client)
+          (cpl:retry)))
+     (let ((actionlib:*action-server-timeout* 10.0))
+       (actionlib:call-goal
+        (get-robosherlock-action-client)
+        (robots-common:make-symbol-type-message
+         'iai_robosherlock_msgs-msg:HighlightObjectGoal
+         :obj_name object-name)
+        :timeout action-timeout)))))
 
 
 
