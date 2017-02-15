@@ -44,7 +44,7 @@
     (:computable "http://knowrob.org/kb/computable.owl#")))
 
 (defparameter *cram-owl-names*
-  '((:red-wasp "SherpWaspRed" )
+  '((:red-wasp "SherpaWaspRed" )
     (:blue-wasp "SherpaWaspBlue")
     (:hawk "SherpaHawk")
     (:donkey "SherpaDonkey")
@@ -52,20 +52,16 @@
     (:go "Movement-TranslationEvent")
     (:going "Movement-TranslationEvent")
     (:scan "Scanning")
-;    (:scanning "Scanning")
     ;; TODO: talk to Daniel about TurningOn/Off
     ;; (:switch-on "TurningOnPoweredDevice")
     ;; (:switch-off "TurningOffPoweredDevice")
     (:look-for "Perceiving-Voluntary")
-;    (:looking-for "Perceiving-Voluntary")
     (:land "Landing-Aircraft")
-;    (:landing "Landing-Aircraft")
     (:mount "MountingSomething")
-;    (:mounting "MountingSomething")
-    (:take-off "TakingOffAircraft")
-;    (:taking-off "TakingOffAircraft")
-    )
+    (:take-off "TakingOffAircraft"))
   "An association list of CRAM name to OWL name mappings")
+
+(defparameter *logging-namespace-default* "knowrob")
 
 (defgeneric log-owl (object &key &allow-other-keys)
   (:documentation "call logging action on `object'"))
@@ -168,17 +164,11 @@
 (defun loggable-location-type ()
   (namespaced :knowrob "Location"))
 
-(defun loggable-perception-event-name ()
-  (unique-id-ed "SemanticMapPerception"))
+(defun loggable-pose-name ()
+  (namespaced :u-map (unique-id-ed "Pose")))
 
-(defun loggable-perception-event-type ()
-  (namespaced :knowrob "SemanticMapPerception"))
-
-(defun loggable-transformation-name ()
-  (namespaced :u-map (unique-id-ed "Transformation")))
-
-(defun loggable-transformation-type ()
-  (namespaced :knowrob "Transformation"))
+(defun loggable-pose-type ()
+  (namespaced :knowrob "Pose"))
 
 (defun cram-owl-name (cram-name)
   (declare (type keyword cram-name))
@@ -189,7 +179,7 @@
   ;; todo: json query to find out the instance of robot
   (namespaced :knowrob (cram-owl-name (intern (symbol-name cram-robot-type) :keyword))))
 
-(defun loggable-robot-instance (&optional cram-robot-type)
+(defun loggable-robot-individual-name (&optional cram-robot-type)
   (declare (type (or null symbol) cram-robot-type))
   (let ((owl-robot-name
             (cut:var-value
@@ -209,33 +199,6 @@
 (defun loggable-action-type (cram-action-type)
   (namespaced :knowrob (cram-owl-name cram-action-type)))
 
-(defmethod log-owl ((designator location-designator) &key name-with-id)
-  (let ((perception-event-name (loggable-perception-event-name)))
-    (call-logging-action
-     (make-logging-goal
-      name-with-id
-      (loggable-location-type)
-      (vector (make-property-msg "knowrob:pose" :resource perception-event-name))))
-    (log-owl (desig:desig-prop-value designator :pose)
-             :event-name-with-id perception-event-name)))
-
-(defmethod log-owl ((pose cl-transforms:pose) &key event-name-with-id)
-  (let ((transformation-name (loggable-transformation-name)))
-    (call-logging-action
-     (make-logging-goal
-      event-name-with-id
-      (loggable-perception-event-type)
-      (vector (make-property-msg "knowrob:eventOccursAt" :resource transformation-name)
-              (make-property-msg "knowrob:startTime"
-                                 :resource (namespaced :u-map (loggable-timepoint))))))
-    (call-logging-action
-     (make-logging-goal
-      transformation-name
-      (loggable-transformation-type)
-      (vector (make-property-msg "knowrob:translation" :type (namespaced :xsd "string")
-                                                       :value "580.827087 -305.567047 181.226364")
-              (make-property-msg "knowrob:quaternion" :type (namespaced :xsd "string")
-                                                      :value "1.0 0.0 0.0 0.0"))))))
 
 (defgeneric log-owl-action (action-type action-designator &key start-time agent))
 
@@ -247,7 +210,99 @@
    :start-time start-time
    :agent agent))
 
-;; TODO: ask Mihai to return the NAME+ID of logged entry
+
+(defun loggable-property-with-resource (name resource &optional name-namespace)
+  (declare (type keyword name)
+           (type (or null string) resource name-namespace))
+  (make-property-msg
+   (concatenate 'string
+                (or name-namespace *logging-namespace-default*)
+                ":"
+                (symbol-name name))
+   :resource (or resource "")))
+
+(defun loggable-property-with-value (name value-type value &optional name-namespace)
+  (declare (type keyword name)
+           (type (or null string) value-type value name-namespace))
+  (make-property-msg
+   (concatenate 'string
+                (or name-namespace *logging-namespace-default*)
+                ":"
+                (symbol-name name))
+   :type (or value-type "")
+   :value (or value "")))
+
+(defgeneric loggable-property (name &key &allow-other-keys))
+
+(defmethod loggable-property ((name (eql :|startTime|)) &key time)
+  (declare (type (or null double-float) time))
+  (loggable-property-with-resource name (loggable-timepoint time)))
+
+(defmethod loggable-property ((name (eql :|endTime|)) &key time)
+  (declare (type (or null double-float) time))
+  (loggable-property-with-resource name (loggable-timepoint time)))
+
+(defmethod loggable-property ((name (eql :|taskSuccess|)) &key true-or-false)
+  (declare (type boolean true-or-false))
+  (loggable-property-with-value name
+                                (namespaced :xsd "boolean")
+                                (if true-or-false
+                                    "true"
+                                    "false")))
+
+(defmethod loggable-property ((name (eql :|performedBy|)) &key agent)
+  (declare (type (or null symbol) agent))
+  (loggable-property-with-resource name (loggable-robot-individual-name agent)))
+
+(defun loggable-atomic-property (property-name individual-name)
+  (declare (type string individual-name))
+  (loggable-property-with-resource property-name individual-name))
+
+(defmethod loggable-property ((name (eql :|goalLocation|)) &key individual-name)
+  (loggable-atomic-property name individual-name))
+
+(defmethod loggable-property ((name (eql :|pose|)) &key individual-name)
+  (loggable-atomic-property name individual-name))
+
+(defmethod loggable-property ((name (eql :|translation|)) &key pose)
+  (declare (type cl-transforms:pose pose))
+  (loggable-property-with-value name
+                                (namespaced :xsd "string")
+                                (with-slots ((x cl-transforms:x)
+                                             (y cl-transforms:y)
+                                             (z cl-transforms:z))
+                                    (cl-transforms:origin pose)
+                                  (format nil "~a ~a ~a" x y z))))
+
+(defmethod loggable-property ((name (eql :|quaternion|)) &key pose)
+  (declare (type cl-transforms:pose pose))
+  (loggable-property-with-value name
+                                (namespaced :xsd "string")
+                                (with-slots ((x cl-transforms:x)
+                                             (y cl-transforms:y)
+                                             (z cl-transforms:z)
+                                             (w cl-transforms:w))
+                                    (cl-transforms:orientation pose)
+                                  (format nil "~a ~a ~a ~a" w x y z))))
+
+
+(defmethod log-owl ((pose cl-transforms:pose) &key pose-name-with-id)
+  (call-logging-action
+   (make-logging-goal
+    pose-name-with-id
+    (loggable-pose-type)
+    (vector (loggable-property :|translation| :pose pose)
+            (loggable-property :|quaternion| :pose pose)))))
+
+(defmethod log-owl ((designator location-designator) &key name-with-id)
+  (let ((pose-name (loggable-pose-name)))
+    (call-logging-action
+     (make-logging-goal
+      name-with-id
+      (loggable-location-type)
+      (vector (loggable-property :|pose| :individual-name pose-name))))
+    (log-owl (desig:desig-prop-value designator :pose)
+             :pose-name-with-id pose-name)))
 
 (defmethod log-owl-action ((type (eql :go)) designator &key start-time agent)
   (let ((goal-location-name (loggable-location-name)))
@@ -255,12 +310,11 @@
      (make-logging-goal
       (loggable-action-individual-name type)
       (loggable-action-type type)
-      (vector (make-property-msg "knowrob:startTime" :resource (loggable-timepoint start-time))
-              (make-property-msg "knowrob:endTime" :resource (loggable-timepoint))
-              (make-property-msg "knowrob:taskSuccess" :type (namespaced :xsd "boolean")
-                                                       :value "true")
-              (make-property-msg "knowrob:performedBy" :resource (loggable-robot-instance agent))
-              (make-property-msg "knowrob:goalLocation" :resource goal-location-name))))
+      (vector (loggable-property :|startTime| :time start-time)
+              (loggable-property :|endTime|)
+              (loggable-property :|taskSuccess| :true-or-false T)
+              (loggable-property :|performedBy| :agent agent)
+              (loggable-property :|goalLocation| :individual-name goal-location-name))))
     (log-owl (or (car (remove :go (desig:desig-prop-values designator :to)))
                  (desig:desig-prop-value designator :destination))
              :name-with-id goal-location-name)))

@@ -82,7 +82,7 @@
         class-name))))
 
 
-(defun rosify_ (lispy-symbol)
+(defun rosify (lispy-symbol)
   (declare (type symbol lispy-symbol))
   "taken from cram_json_prolog PROLOGIFY function"
   (flet ((contains-lower-case-char (symbol)
@@ -97,6 +97,10 @@
         (string lispy-symbol)
         (string-downcase (substitute #\_ #\- (copy-seq (string lispy-symbol)))))))
 
+(defun derosify (ros-string &optional package)
+  (declare (type string ros-string))
+  (intern (string-upcase (substitute #\- #\_ ros-string))
+          (or package :keyword)))
 
 
 (defmacro make-symbol-type-message (msg-type-as-symbol &rest args)

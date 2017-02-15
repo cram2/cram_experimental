@@ -30,7 +30,7 @@
 (in-package :robots-common)
 
 (defun main ()
-  (let ((agent-ros-name (rosify_ (current-robot-symbol))))
+  (let ((agent-ros-name (rosify (current-robot-symbol))))
     (let (perform-server-status-thread perform-server-callback-thread)
       (unwind-protect
            (progn

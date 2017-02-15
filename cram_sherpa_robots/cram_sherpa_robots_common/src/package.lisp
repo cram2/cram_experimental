@@ -62,5 +62,6 @@
    #:current-robot-symbol
    #:current-robot-package
    #:current-robot-name
-   #:rosify_
+   #:rosify
+   #:derosify
    #:make-symbol-type-message))
