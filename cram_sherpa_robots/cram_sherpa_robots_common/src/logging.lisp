@@ -70,7 +70,7 @@
 (defgeneric log-owl (object &key &allow-other-keys)
   (:documentation "call logging action on `object'"))
 
-(defparameter *logging-action-name* "???")
+(defparameter *logging-action-name* "ue_semlog/LogEvent")
 (defparameter *logging-action-type* "sherpa_msgs/LogEventAction")
 
 (defparameter *logging-action-timeout* 3
@@ -112,18 +112,17 @@
   (roslisp:ros-info (robots-common logging-client)
                     "Calling CALL-LOGGING-ACTION with ~a" action-goal)
   (unless action-timeout (setf action-timeout *logging-action-timeout*))
-  ;; (multiple-value-bind (result status)
-  ;;     (cpl:with-failure-handling
-  ;;         ((simple-error (e)
-  ;;            (format t "Actionlib error occured!~%~a~%Reinitializing...~%~%" e)
-  ;;            (init-logging-action-client)
-  ;;            (cpl:retry)))
-  ;;       (let ((actionlib:*action-server-timeout* 10.0))
-  ;;         (actionlib:call-goal
-  ;;          (get-logging-action-client) action-goal :timeout action-timeout)))
-  ;;   (print result)
-  ;;   status)
-  )
+  (multiple-value-bind (result status)
+      (cpl:with-failure-handling
+          ((simple-error (e)
+             (format t "Actionlib error occured!~%~a~%Reinitializing...~%~%" e)
+             (init-logging-action-client)
+             (cpl:retry)))
+        (let ((actionlib:*action-server-timeout* 10.0))
+          (actionlib:call-goal
+           (get-logging-action-client) action-goal :timeout action-timeout)))
+    (print result)
+    status))
 
 (defun make-property-msg (name &key resource type value)
   (declare (type string name)
@@ -166,6 +165,21 @@
 (defun loggable-location-name ()
   (namespaced :log (unique-id-ed "location")))
 
+(defun loggable-location-type ()
+  (namespaced :knowrob "Location"))
+
+(defun loggable-perception-event-name ()
+  (unique-id-ed "SemanticMapPerception"))
+
+(defun loggable-perception-event-type ()
+  (namespaced :knowrob "SemanticMapPerception"))
+
+(defun loggable-transformation-name ()
+  (namespaced :u-map (unique-id-ed "Transformation")))
+
+(defun loggable-transformation-type ()
+  (namespaced :knowrob "Transformation"))
+
 (defun cram-owl-name (cram-name)
   (declare (type keyword cram-name))
   (cadr (assoc cram-name *cram-owl-names*)))
@@ -196,14 +210,34 @@
   (namespaced :knowrob (cram-owl-name cram-action-type)))
 
 (defmethod log-owl ((designator location-designator) &key name-with-id)
-  (call-logging-action
-   (make-logging-goal
-    name-with-id
-    (namespaced :knowrob "Location")
-    (vector (make-property-msg "knowrob:startTime" :resource (loggable-timepoint))
-          (make-property-msg "knowrob:endTime" :resource (loggable-timepoint))
-          (make-property-msg "knowrob:taskSuccess" :type (namespaced :xsd "boolean")
-                                                   :value "true")))))
+  (let ((perception-event-name (loggable-perception-event-name)))
+    (call-logging-action
+     (make-logging-goal
+      name-with-id
+      (loggable-location-type)
+      (vector (make-property-msg "knowrob:pose" :resource perception-event-name))))
+    (log-owl (desig:desig-prop-value designator :pose)
+             :event-name-with-id perception-event-name)))
+
+(defmethod log-owl ((pose cl-transforms:pose) &key event-name-with-id)
+  (let ((transformation-name (loggable-transformation-name)))
+    (call-logging-action
+     (make-logging-goal
+      event-name-with-id
+      (loggable-perception-event-type)
+      (vector (make-property-msg "knowrob:eventOccursAt" :resource transformation-name)
+              (make-property-msg "knowrob:startTime"
+                                 :resource (namespaced :u-map (loggable-timepoint))))))
+    (call-logging-action
+     (make-logging-goal
+      transformation-name
+      (loggable-transformation-type)
+      (vector (make-property-msg "knowrob:translation" :type (namespaced :xsd "string")
+                                                       :value "580.827087 -305.567047 181.226364")
+              (make-property-msg "knowrob:quaternion" :type (namespaced :xsd "string")
+                                                      :value "1.0 0.0 0.0 0.0"))))))
+
+(defgeneric log-owl-action (action-type action-designator &key start-time agent))
 
 (defmethod log-owl ((designator action-designator) &key start-time agent)
   (log-owl-action
@@ -212,8 +246,6 @@
    designator
    :start-time start-time
    :agent agent))
-
-(defgeneric log-owl-action (action-type action-designator &key start-time agent))
 
 ;; TODO: ask Mihai to return the NAME+ID of logged entry
 
