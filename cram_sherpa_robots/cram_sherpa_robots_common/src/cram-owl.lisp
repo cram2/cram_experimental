@@ -49,16 +49,25 @@
     (:hawk "SherpaHawk")
     (:donkey "SherpaDonkey")
 
+    (:engine "Engine")
+    (:beacon "Beacon")
+
+    (:victim "SherpaVictim")
+    (:kite "SherpaHangGlider")
+
     (:go "Movement-TranslationEvent")
     (:going "Movement-TranslationEvent")
-    (:scan "Scanning")
-    ;; TODO: talk to Daniel about TurningOn/Off
-    ;; (:switch-on "TurningOnPoweredDevice")
-    ;; (:switch-off "TurningOffPoweredDevice")
-    (:look-for "Perceiving-Voluntary")
+    (:fly "Flying")
+    (:take-off "TakeOff-Flight")
+    (:set-altitude "ChangingAircraftAltitude")
     (:land "Landing-Aircraft")
-    (:mount "MountingSomething")
-    (:take-off "TakingOffAircraft"))
+    (:scan "ScanningArea")
+    (:switch "TogglingDeviceState")
+    (:drive "Driving")
+    (:mount "MountingOntoSurface")
+    (:unmount "SeparationIntoConstituentParts")
+    (:look-for "LookingForSomething")
+    (:take-picture "Perceiving-Voluntary"))
   "An association list of CRAM name to OWL name mappings")
 
 (defparameter *logging-namespace-default* "knowrob")
@@ -170,9 +179,26 @@
 (defun loggable-pose-type ()
   (namespaced :knowrob "Pose"))
 
+(defun loggable-image-name ()
+  (namespaced :log (unique-id-ed "CameraImage")))
+
+(defun loggable-image-type ()
+  (namespaced :knowrob "CameraImage"))
+
 (defun cram-owl-name (cram-name)
   (declare (type keyword cram-name))
   (cadr (assoc cram-name *cram-owl-names*)))
+
+(defun owl-individual-of-class (class)
+  (let ((name (cut:var-value
+               :?name
+               (car
+                (json-prolog:prolog
+                 `("owl_individual_of" ?name ,class)
+                 :package :keyword)))))
+    (if (cut:is-var name)
+        NIL
+        (string-trim "'" (symbol-name name)))))
 
 (defun loggable-robot-type (cram-robot-type)
   (declare (type symbol cram-robot-type))
@@ -181,17 +207,8 @@
 
 (defun loggable-robot-individual-name (&optional cram-robot-type)
   (declare (type (or null symbol) cram-robot-type))
-  (let ((owl-robot-name
-            (cut:var-value
-             :?name
-             (car
-              (json-prolog:prolog
-               `("owl_individual_of" ?name ,(robots-common::loggable-robot-type
-                                             (or cram-robot-type (current-robot-symbol))))
-               :package :keyword)))))
-      (if (cut:is-var owl-robot-name)
-          NIL
-          (string-trim "'" (symbol-name owl-robot-name)))))
+  (owl-individual-of-class
+   (robots-common::loggable-robot-type (or cram-robot-type (current-robot-symbol)))))
 
 (defun loggable-action-individual-name (cram-action-type)
   (namespaced :log (unique-id-ed (cram-owl-name cram-action-type))))
@@ -199,8 +216,26 @@
 (defun loggable-action-type (cram-action-type)
   (namespaced :knowrob (cram-owl-name cram-action-type)))
 
+(defun loggable-action (cram-action-type start-time end-time task-success agent
+                        &rest loggable-properties)
+  (make-logging-goal
+   (loggable-action-individual-name cram-action-type)
+   (loggable-action-type cram-action-type)
+   (apply #'vector
+          (loggable-property :|startTime| :time start-time)
+          (loggable-property :|endTime| :time end-time)
+          (loggable-property :|taskSuccess| :true-or-false task-success)
+          (loggable-property :|performedBy| :agent agent)
+          loggable-properties)))
 
-(defgeneric log-owl-action (action-type action-designator &key start-time agent))
+
+(defgeneric log-owl-action (action-type action-designator &key start-time agent)
+  (:documentation "Calls the logging action. `action-type' is :TO or :TYPE property.")
+  (:method (action-type action-designator &key start-time agent)
+    (declare (ignore action-designator start-time agent))
+    (roslisp:ros-warn (common cram-owl)
+                      "Action-type ~a not supported. Skipping" action-type)
+    NIL))
 
 (defmethod log-owl ((designator action-designator) &key start-time agent)
   (log-owl-action
@@ -254,16 +289,6 @@
   (declare (type (or null symbol) agent))
   (loggable-property-with-resource name (loggable-robot-individual-name agent)))
 
-(defun loggable-atomic-property (property-name individual-name)
-  (declare (type string individual-name))
-  (loggable-property-with-resource property-name individual-name))
-
-(defmethod loggable-property ((name (eql :|goalLocation|)) &key individual-name)
-  (loggable-atomic-property name individual-name))
-
-(defmethod loggable-property ((name (eql :|pose|)) &key individual-name)
-  (loggable-atomic-property name individual-name))
-
 (defmethod loggable-property ((name (eql :|translation|)) &key pose)
   (declare (type cl-transforms:pose pose))
   (loggable-property-with-value name
@@ -300,24 +325,161 @@
      (make-logging-goal
       name-with-id
       (loggable-location-type)
-      (vector (loggable-property :|pose| :individual-name pose-name))))
+      (vector (loggable-property-with-resource :|pose| pose-name))))
     (log-owl (desig:desig-prop-value designator :pose)
              :pose-name-with-id pose-name)))
 
 (defmethod log-owl-action ((type (eql :go)) designator &key start-time agent)
   (let ((goal-location-name (loggable-location-name)))
     (call-logging-action
-     (make-logging-goal
-      (loggable-action-individual-name type)
-      (loggable-action-type type)
-      (vector (loggable-property :|startTime| :time start-time)
-              (loggable-property :|endTime|)
-              (loggable-property :|taskSuccess| :true-or-false T)
-              (loggable-property :|performedBy| :agent agent)
-              (loggable-property :|goalLocation| :individual-name goal-location-name))))
+     (loggable-action
+      type start-time NIL T agent
+      (loggable-property-with-resource :|goalLocation| goal-location-name)))
     (log-owl (or (car (remove :go (desig:desig-prop-values designator :to)))
                  (desig:desig-prop-value designator :destination))
              :name-with-id goal-location-name)))
 
 (defmethod log-owl-action ((type (eql :going)) designator &key start-time agent)
   (log-owl-action :go designator :start-time start-time :agent agent))
+
+(defmethod log-owl-action ((type (eql :fly)) designator &key start-time agent)
+  (let ((goal-location-name (loggable-location-name)))
+    (call-logging-action
+     (loggable-action
+      type start-time NIL T agent
+      (loggable-property-with-resource :|goalLocation| goal-location-name)))
+    (log-owl (or (car (remove :fly (desig:desig-prop-values designator :to)))
+                 (desig:desig-prop-value designator :destination))
+             :name-with-id goal-location-name)))
+
+(defmethod log-owl-action ((type (eql :flying)) designator &key start-time agent)
+  (log-owl-action :fly designator :start-time start-time :agent agent))
+
+(defmethod log-owl-action ((type (eql :drive)) designator &key start-time agent)
+  (let ((goal-location-name (loggable-location-name)))
+    (call-logging-action
+     (loggable-action
+      type start-time NIL T agent
+      (loggable-property-with-resource :|goalLocation| goal-location-name)))
+    (log-owl (or (car (remove :drive (desig:desig-prop-values designator :to)))
+                 (desig:desig-prop-value designator :destination))
+             :name-with-id goal-location-name)))
+
+(defmethod log-owl-action ((type (eql :driving)) designator &key start-time agent)
+  (log-owl-action :drive designator :start-time start-time :agent agent))
+
+(defmethod log-owl-action ((type (eql :switch)) designator &key start-time agent)
+  (let* ((device-cram (desig:desig-prop-value designator :device))
+         (device-type-owl (namespaced :knowrob (cram-owl-name device-cram)))
+         (device-individual (owl-individual-of-class device-type-owl))
+         (state-cram (desig:desig-prop-value designator :state)))
+    (call-logging-action
+     (loggable-action
+      type start-time NIL T agent
+      (loggable-property-with-resource :|objectActedOn| device-individual)
+      (loggable-property-with-resource :|deviceState|
+                                       (if (eql state-cram :on)
+                                           (namespaced :knowrob "DeviceStateOn")
+                                           (namespaced :knowrob "DeviceStateOff")))))))
+
+(defmethod log-owl-action ((type (eql :switching)) designator &key start-time agent)
+  (log-owl-action :switch designator :start-time start-time :agent agent))
+
+(defmethod log-owl-action ((type (eql :land)) designator &key start-time agent)
+  (let ((goal-location-name (loggable-location-name)))
+    (call-logging-action
+     (loggable-action
+      type start-time NIL T agent
+      (loggable-property-with-resource :|goalLocation| goal-location-name)))
+    (log-owl (or (desig:desig-prop-value designator :at)
+                 (desig:desig-prop-value designator :destination))
+             :name-with-id goal-location-name)))
+
+(defmethod log-owl-action ((type (eql :landing)) designator &key start-time agent)
+  (log-owl-action :land designator :start-time start-time :agent agent))
+
+(defmethod log-owl-action ((type (eql :take-off)) designator &key start-time agent)
+  (let ((altitude (or (car (remove :take-off (desig:desig-prop-values designator :to)))
+                      (desig:desig-prop-value designator :altitude))))
+    (call-logging-action
+     (loggable-action
+      type start-time NIL T agent
+      (loggable-property-with-value :|altitude| (namespaced :xsd "double") altitude)))))
+
+(defmethod log-owl-action ((type (eql :taking-off)) designator &key start-time agent)
+  (log-owl-action :take-off designator :start-time start-time :agent agent))
+
+(defmethod log-owl-action ((type (eql :set-altitude)) designator &key start-time agent)
+  (let ((altitude (or (car (remove :set-altitude (desig:desig-prop-values designator :to)))
+                      (desig:desig-prop-value designator :value))))
+    (call-logging-action
+     (loggable-action
+      type start-time NIL T agent
+      (loggable-property-with-value :|altitude| (namespaced :xsd "double") altitude)))))
+
+(defmethod log-owl-action ((type (eql :setting-altitude)) designator &key start-time agent)
+  (log-owl-action :set-altitude designator :start-time start-time :agent agent))
+
+(defmethod log-owl-action ((type (eql :mount)) designator &key start-time agent)
+  (let ((cram-agent-to-mount (desig:desig-prop-value designator :agent)))
+    (call-logging-action
+     (loggable-action
+      type start-time NIL T agent
+      (loggable-property-with-resource :|objectActedOn|
+                                       (loggable-robot-individual-name cram-agent-to-mount))))))
+
+(defmethod log-owl-action ((type (eql :mounting)) designator &key start-time agent)
+  (log-owl-action :mount designator :start-time start-time :agent agent))
+
+(defmethod log-owl-action ((type (eql :unmount)) designator &key start-time agent)
+  (let ((cram-agent-to-mount (desig:desig-prop-value designator :agent)))
+    (call-logging-action
+     (loggable-action
+      type start-time NIL T agent
+      (loggable-property-with-resource :|objectActedOn|
+                                       (loggable-robot-individual-name cram-agent-to-mount))))))
+
+(defmethod log-owl-action ((type (eql :unmounting)) designator &key start-time agent)
+  (log-owl-action :unmount designator :start-time start-time :agent agent))
+
+(defmethod log-owl-action ((type (eql :scan)) designator &key start-time agent)
+  (let ((owl-area (desig:desig-prop-value designator :area)))
+    (call-logging-action
+     (loggable-action
+      type start-time NIL T agent
+      (loggable-property-with-resource :|objectActedOn| owl-area)))))
+
+(defmethod log-owl-action ((type (eql :scanning)) designator &key start-time agent)
+  (log-owl-action :scan designator :start-time start-time :agent agent))
+
+(defmethod log-owl-action ((type (eql :look-for)) designator &key start-time agent)
+  (let ((cram-object (desig:desig-prop-value designator :object)))
+    (call-logging-action
+     (loggable-action
+      type start-time NIL T agent
+      (loggable-property-with-resource :|objectActedOn|
+                                       (namespaced :knowrob (cram-owl-name cram-object)))))))
+
+(defmethod log-owl-action ((type (eql :looking-for)) designator &key start-time agent)
+  (log-owl-action :mount designator :start-time start-time :agent agent))
+
+(defmethod log-owl-action ((type (eql :take-picture)) designator &key start-time agent)
+  (let ((image-name (loggable-image-name))
+        (end-time (roslisp:ros-time)))
+    (call-logging-action
+     (loggable-action
+      type start-time end-time T agent
+      (loggable-property-with-resource :|perceptionResult| "")
+      (loggable-property-with-resource :|capturedImage| image-name)))
+    (call-logging-action
+     (make-logging-goal
+      image-name
+      (loggable-image-type)
+      (vector (loggable-property-with-resource :|captureTime| (loggable-timepoint end-time))
+              (loggable-property-with-value :|rosTopic| (namespaced :xsd "string") ""
+                                            ;; "Robosherlock/output_image"
+                                            )
+              (loggable-property-with-value :|linkToImageFile| (namespaced :xsd "string") ""))))))
+
+(defmethod log-owl-action ((type (eql :taking-picture)) designator &key start-time agent)
+  (log-owl-action :take-picture designator :start-time start-time :agent agent))
