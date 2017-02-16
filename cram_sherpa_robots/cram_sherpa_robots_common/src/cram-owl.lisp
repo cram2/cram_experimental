@@ -29,6 +29,8 @@
 
 (in-package :robots-common)
 
+(defparameter *logging-enabled* nil)
+
 (defparameter *unique-id-length* 14
   "How many characters to append to create unique IDs for OWL individuals")
 
@@ -116,18 +118,19 @@
            (type (or null number) action-timeout))
   (roslisp:ros-info (robots-common logging-client)
                     "Calling CALL-LOGGING-ACTION with ~a" action-goal)
-  (unless action-timeout (setf action-timeout *logging-action-timeout*))
-  (multiple-value-bind (result status)
-      (cpl:with-failure-handling
-          ((simple-error (e)
-             (format t "Actionlib error occured!~%~a~%Reinitializing...~%~%" e)
-             (init-logging-action-client)
-             (cpl:retry)))
-        (let ((actionlib:*action-server-timeout* 10.0))
-          (actionlib:call-goal
-           (get-logging-action-client) action-goal :timeout action-timeout)))
-    (print result)
-    status))
+  (when *logging-enabled*
+    (unless action-timeout (setf action-timeout *logging-action-timeout*))
+    (multiple-value-bind (result status)
+        (cpl:with-failure-handling
+            ((simple-error (e)
+               (format t "Actionlib error occured!~%~a~%Reinitializing...~%~%" e)
+               (init-logging-action-client)
+               (cpl:retry)))
+          (let ((actionlib:*action-server-timeout* 10.0))
+            (actionlib:call-goal
+             (get-logging-action-client) action-goal :timeout action-timeout)))
+      (print result)
+      status)))
 
 (defun make-property-msg (name &key resource type value)
   (declare (type string name)
@@ -237,9 +240,20 @@
                       "Action-type ~a not supported. Skipping" action-type)
     NIL))
 
+(defmethod log-owl :before (object &key &allow-other-keys)
+  (format t "LOGGING OBJECT: ~a~%" object))
+
 (defmethod log-owl ((designator action-designator) &key start-time agent)
   (log-owl-action
-   (or (desig:desig-prop-value designator :to)
+   (or (car (remove-if-not #'keywordp (desig:desig-prop-values designator :to)))
+       (desig:desig-prop-value designator :type))
+   designator
+   :start-time start-time
+   :agent agent))
+
+(defmethod log-owl ((designator motion-designator) &key start-time agent)
+  (log-owl-action
+   (or (car (remove-if-not #'keywordp (desig:desig-prop-values designator :to)))
        (desig:desig-prop-value designator :type))
    designator
    :start-time start-time
@@ -311,10 +325,10 @@
                                   (format nil "~a ~a ~a ~a" w x y z))))
 
 
-(defmethod log-owl ((pose cl-transforms:pose) &key pose-name-with-id)
+(defmethod log-owl ((pose cl-transforms:pose) &key name-with-id)
   (call-logging-action
    (make-logging-goal
-    pose-name-with-id
+    name-with-id
     (loggable-pose-type)
     (vector (loggable-property :|translation| :pose pose)
             (loggable-property :|quaternion| :pose pose)))))
@@ -327,7 +341,7 @@
       (loggable-location-type)
       (vector (loggable-property-with-resource :|pose| pose-name))))
     (log-owl (desig:desig-prop-value designator :pose)
-             :pose-name-with-id pose-name)))
+             :name-with-id pose-name)))
 
 (defmethod log-owl-action ((type (eql :go)) designator &key start-time agent)
   (let ((goal-location-name (loggable-location-name)))
@@ -404,7 +418,8 @@
     (call-logging-action
      (loggable-action
       type start-time NIL T agent
-      (loggable-property-with-value :|altitude| (namespaced :xsd "double") altitude)))))
+      (loggable-property-with-value :|altitude| (namespaced :xsd "double")
+                                    (write-to-string altitude))))))
 
 (defmethod log-owl-action ((type (eql :taking-off)) designator &key start-time agent)
   (log-owl-action :take-off designator :start-time start-time :agent agent))
@@ -415,7 +430,8 @@
     (call-logging-action
      (loggable-action
       type start-time NIL T agent
-      (loggable-property-with-value :|altitude| (namespaced :xsd "double") altitude)))))
+      (loggable-property-with-value :|altitude| (namespaced :xsd "double")
+                                    (write-to-string altitude))))))
 
 (defmethod log-owl-action ((type (eql :setting-altitude)) designator &key start-time agent)
   (log-owl-action :set-altitude designator :start-time start-time :agent agent))

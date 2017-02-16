@@ -65,23 +65,27 @@ similar to what we have for locations.")
     (unless (cpm:matching-available-process-modules designator)
       (cpl:fail "No matching process module found for ~a" designator))
     (try-reference-designator designator "Cannot perform motion.")
-    (pm-execute-matching designator))
+    (let ((start-time (roslisp:ros-time)))
+      (pm-execute-matching designator)
+      (log-owl designator :start-time start-time)))
 
   (:method ((designator action-designator))
     (destructuring-bind (command &rest arguments)
         (try-reference-designator designator)
       (if (fboundp command)
           (let ((desig-goal (desig-prop-value designator :goal)))
-            (if desig-goal
-                (let ((occasion (convert-desig-goal-to-occasion desig-goal)))
-                  (if (cram-occasions-events:holds occasion)
-                      (roslisp:ros-info (perform)
-                                        "Action goal `~a' already achieved."
-                                        occasion)
-                      (apply command arguments))
-                  (unless (cram-occasions-events:holds occasion)
-                    (cpl:fail "Goal `~a' of action `~a' was not achieved."
-                              designator occasion)))
-                (apply command arguments)))
+            (let ((start-time (roslisp:ros-time)))
+              (if desig-goal
+                  (let ((occasion (convert-desig-goal-to-occasion desig-goal)))
+                    (if (cram-occasions-events:holds occasion)
+                        (roslisp:ros-info (perform)
+                                          "Action goal `~a' already achieved."
+                                          occasion)
+                        (apply command arguments))
+                    (unless (cram-occasions-events:holds occasion)
+                      (cpl:fail "Goal `~a' of action `~a' was not achieved."
+                                designator occasion)))
+                  (apply command arguments))
+              (log-owl designator :start-time start-time)))
           (cpl:fail "Action designator `~a' resolved to cram function `~a',
 but it isn't defined. Cannot perform action." designator command)))))
