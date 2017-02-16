@@ -38,7 +38,7 @@
        take_picture         TakePictureAction
  )
 
-(define-action-client hawk fly "sherpa_msgs/MoveToAction" 5)
+(define-action-client hawk fly "sherpa_msgs/MoveToAction" 1000)
 (define-action-client hawk set-altitude "sherpa_msgs/SetAltitudeAction" 5)
 (define-action-client hawk toggle-engine "sherpa_msgs/ToggleActuatorAction" 5)
 (define-action-client hawk toggle-camera "sherpa_msgs/ToggleActuatorAction" 5)

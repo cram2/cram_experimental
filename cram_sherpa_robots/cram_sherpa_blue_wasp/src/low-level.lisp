@@ -39,9 +39,10 @@
             detect_victim   ToggleVictimTrackingAction
  )
 
-(define-action-client blue-wasp fly "sherpa_msgs/MoveToAction" 5)
+(define-action-client blue-wasp fly "sherpa_msgs/MoveToAction" 1000)
 (define-action-client blue-wasp set-altitude "sherpa_msgs/SetAltitudeAction" 5)
 (define-action-client blue-wasp toggle-engine "sherpa_msgs/ToggleActuatorAction" 5)
 (define-action-client blue-wasp toggle-camera "sherpa_msgs/ToggleActuatorAction" 5)
 (define-action-client blue-wasp take-picture "sherpa_msgs/TakePictureAction" 5)
-(define-action-client blue-wasp detect-victim "sherpa_msgs/ToggleVictimTrackingAction" 5)
+;(define-action-client blue-wasp detect-victim "sherpa_msgs/ToggleVictimTrackingAction" 5)
+

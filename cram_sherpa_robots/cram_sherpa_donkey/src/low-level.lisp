@@ -32,8 +32,8 @@
 ;; /donkey/mount  sherpa_msgs/MountAction
 ;; /donkey/drive              MoveToAction
 
-(define-action-client donkey drive "sherpa_msgs/MoveToAction" 5)
-(define-action-client donkey mount "sherpa_msgs/MountAction" 5)
+(define-action-client donkey drive "sherpa_msgs/MoveToAction" 1000)
+(define-action-client donkey mount "sherpa_msgs/MountAction" 60)
 
 ;; (call-drive-action (make-move-to-goal (cl-transforms-stamped:make-pose-stamped
 ;;                                        cram-tf:*fixed-frame*
