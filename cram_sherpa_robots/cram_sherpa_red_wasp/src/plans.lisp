@@ -32,7 +32,7 @@
 (defmethod perform-with-pms-running ((designator desig:designator))
   (cpm:with-process-modules-running
       (red-wasp-sensors helicopter:helicopter-actuators)
-    (cpl:top-level
+    (cpl-impl::named-top-level (:name red-wasp-tasks)
       (perform designator))))
 
 ;; (defun search-for-victim (?where)
