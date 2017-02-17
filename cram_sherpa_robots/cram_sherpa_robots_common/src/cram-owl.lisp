@@ -43,33 +43,34 @@
     (:log "http://knowrob.org/kb/unreal_log.owl#")
     (:u-map "http://knowrob.org/kb/u_map.owl#")
     (:swrl "http://www.w3.org/2003/11/swrl#")
-    (:computable "http://knowrob.org/kb/computable.owl#")))
+    (:computable "http://knowrob.org/kb/computable.owl#")
+    (:srdl2-action "http://knowrob.org/kb/srdl2-action.owl#")))
 
 (defparameter *cram-owl-names*
-  '((:red-wasp "SherpaWaspRed" )
-    (:blue-wasp "SherpaWaspBlue")
-    (:hawk "SherpaHawk")
-    (:donkey "SherpaDonkey")
+  '((:red-wasp "SherpaWaspRed" :knowrob :log)
+    (:blue-wasp "SherpaWaspBlue" :knowrob :log)
+    (:hawk "SherpaHawk" :knowrob :log)
+    (:donkey "SherpaDonkey" :knowrob :log)
 
-    (:engine "Engine")
-    (:beacon "Beacon")
+    (:engine "Engine" :knowrob :log)
+    (:beacon "Beacon" :knowrob :log)
 
-    (:victim "SherpaVictim")
-    (:kite "SherpaHangGlider")
+    (:victim "SherpaVictim" :knowrob :log)
+    (:kite "SherpaHangGlider" :knowrob :log)
 
-    (:go "Movement-TranslationEvent")
-    (:going "Movement-TranslationEvent")
-    (:fly "Flying")
-    (:take-off "TakeOff-Flight")
-    (:set-altitude "ChangingAircraftAltitude")
-    (:land "Landing-Aircraft")
-    (:scan "ScanningArea")
-    (:switch "TogglingDeviceState")
-    (:drive "Driving")
-    (:mount "MountingOntoSurface")
-    (:unmount "SeparationIntoConstituentParts")
-    (:look-for "LookingForSomething")
-    (:take-picture "Perceiving-Voluntary"))
+    (:go "Movement-TranslationEvent" :knowrob :log)
+    (:going "Movement-TranslationEvent" :knowrob :log)
+    (:fly "Flying" :knowrob :log)
+    (:take-off "TakeOff-Flight" :knowrob :log)
+    (:set-altitude "ChangingAircraftAltitude" :knowrob :log)
+    (:land "Landing-Aircraft" :knowrob :log)
+    (:scan "ScanningArea" :knowrob :log)
+    (:switch "TogglingDeviceState" :knowrob :log)
+    (:drive "Driving" :knowrob :log)
+    (:mount "InstallingHardwareComponent" :srdl2-action :log)
+    (:unmount "SeparationIntoConstituentParts" :knowrob :log)
+    (:look-for "LookingForSomething" :knowrob :log)
+    (:take-picture "Perceiving-Voluntary" :knowrob :log))
   "An association list of CRAM name to OWL name mappings")
 
 (defparameter *logging-namespace-default* "knowrob")
@@ -188,9 +189,14 @@
 (defun loggable-image-type ()
   (namespaced :knowrob "CameraImage"))
 
-(defun cram-owl-name (cram-name)
-  (declare (type keyword cram-name))
-  (cadr (assoc cram-name *cram-owl-names*)))
+(defun cram-owl-name (cram-name &optional namespace-id)
+  (declare (type keyword cram-name)
+           (type (or null keyword) namespace-id))
+  (let ((name-entry (cdr (assoc cram-name *cram-owl-names*))))
+    (if namespace-id
+        (namespaced (nth (case namespace-id (:class 1) (:individual 2)) name-entry)
+                    (first name-entry))
+        (first name-entry))))
 
 (defun owl-individual-of-class (class)
   (let ((name (cut:var-value
@@ -206,18 +212,18 @@
 (defun loggable-robot-type (cram-robot-type)
   (declare (type symbol cram-robot-type))
   ;; todo: json query to find out the instance of robot
-  (namespaced :knowrob (cram-owl-name (intern (symbol-name cram-robot-type) :keyword))))
+  (cram-owl-name (intern (symbol-name cram-robot-type) :keyword) :class))
 
 (defun loggable-robot-individual-name (&optional cram-robot-type)
   (declare (type (or null symbol) cram-robot-type))
   (owl-individual-of-class
-   (robots-common::loggable-robot-type (or cram-robot-type (current-robot-symbol)))))
+   (loggable-robot-type (or cram-robot-type (current-robot-symbol)))))
 
 (defun loggable-action-individual-name (cram-action-type)
-  (namespaced :log (unique-id-ed (cram-owl-name cram-action-type))))
+  (unique-id-ed (cram-owl-name cram-action-type :individual)))
 
 (defun loggable-action-type (cram-action-type)
-  (namespaced :knowrob (cram-owl-name cram-action-type)))
+  (cram-owl-name cram-action-type :class))
 
 (defun loggable-action (cram-action-type start-time end-time task-success agent
                         &rest loggable-properties)
@@ -384,7 +390,7 @@
 
 (defmethod log-owl-action ((type (eql :switch)) designator &key start-time agent)
   (let* ((device-cram (desig:desig-prop-value designator :device))
-         (device-type-owl (namespaced :knowrob (cram-owl-name device-cram)))
+         (device-type-owl (cram-owl-name device-cram :class))
          (device-individual (owl-individual-of-class device-type-owl))
          (state-cram (desig:desig-prop-value designator :state)))
     (call-logging-action
@@ -473,8 +479,7 @@
     (call-logging-action
      (loggable-action
       type start-time NIL T agent
-      (loggable-property-with-resource :|objectActedOn|
-                                       (namespaced :knowrob (cram-owl-name cram-object)))))))
+      (loggable-property-with-resource :|objectActedOn| (cram-owl-name cram-object :class))))))
 
 (defmethod log-owl-action ((type (eql :looking-for)) designator &key start-time agent)
   (log-owl-action :mount designator :start-time start-time :agent agent))
