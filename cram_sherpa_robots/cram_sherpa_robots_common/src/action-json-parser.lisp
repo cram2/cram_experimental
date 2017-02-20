@@ -102,6 +102,8 @@ This is where the result of YASON:PARSE lands."
   (list name (intern (string-upcase (car node)) :keyword)))
 (defmethod parse-json-node ((name (eql :state)) node)
   (list name (intern (string-upcase (car node)) :keyword)))
+(defmethod parse-json-node ((name (eql :object)) node)
+  (list name (intern (string-upcase (car node)) :keyword)))
 
 (defmethod parse-json-node ((name (eql :area)) node)
   (cons name node))
@@ -110,8 +112,6 @@ This is where the result of YASON:PARSE lands."
 (defmethod parse-json-node ((name (eql :value)) node)
   (cons name node))
 (defmethod parse-json-node ((name (eql :agent)) node)
-  (cons name node))
-(defmethod parse-json-node ((name (eql :object)) node)
   (cons name node))
 
 (defmethod parse-json-node ((name (eql :goal)) node)

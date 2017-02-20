@@ -119,8 +119,7 @@
 (defun call-logging-action (action-goal &optional action-timeout)
   (declare (type sherpa_msgs-msg:LogEventGoal action-goal)
            (type (or null number) action-timeout))
-  (roslisp:ros-info (robots-common logging-client)
-                    "Calling CALL-LOGGING-ACTION with ~a" action-goal)
+  (roslisp:ros-info (robots-common logging-client) "Calling CALL-LOGGING-ACTION")
   (when *logging-enabled*
     (unless action-timeout (setf action-timeout *logging-action-timeout*))
     (multiple-value-bind (result status)
