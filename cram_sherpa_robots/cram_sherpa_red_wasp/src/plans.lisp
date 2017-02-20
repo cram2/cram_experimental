@@ -29,11 +29,12 @@
 
 (in-package :red-wasp)
 
-(defmethod perform-with-pms-running ((designator desig:designator))
+(defmethod main ()
   (cpm:with-process-modules-running
       (red-wasp-sensors helicopter:helicopter-actuators)
-    (cpl-impl::named-top-level (:name red-wasp-tasks)
-      (perform designator))))
+    (run-reference-server "red_wasp")
+    (run-perform-server "red_wasp")
+    (roslisp:spin-until nil 100)))
 
 ;; (defun search-for-victim (?where)
 ;;   (perform (desig:a motion (to switch) (device beacon) (state on)))

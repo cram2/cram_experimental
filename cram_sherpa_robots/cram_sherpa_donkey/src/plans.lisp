@@ -29,11 +29,12 @@
 
 (in-package :donkey)
 
-(defmethod perform-with-pms-running ((designator desig:designator))
+(defmethod main ()
   (cpm:with-process-modules-running
       (donkey-navigation donkey-manipulation)
-    (cpl:top-level
-      (perform designator))))
+    (run-reference-server "donkey")
+    (run-perform-server "donkey")
+    (roslisp:spin-until nil 100)))
 
 (defun navigate (?where)
   (perform (desig:a motion (to drive) (to ?where))))

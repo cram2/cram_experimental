@@ -29,11 +29,10 @@
 
 (in-package :robots-common)
 
-(defun main ()
-  (let ((agent-ros-name (rosify (current-robot-symbol))))
-    (roslisp-utilities:startup-ros :name agent-ros-name)
-    (run-reference-server agent-ros-name)
-    (run-perform-server agent-ros-name)))
+(defgeneric main ()
+  (:method :before ()
+    (let ((agent-ros-name (rosify (current-robot-symbol))))
+      (roslisp-utilities:startup-ros :name agent-ros-name))))
 
 ;;;;;;;;;; referencing
 
@@ -51,24 +50,21 @@
 
 ;;;;;;;;;;;; performing
 
-(defgeneric perform-with-pms-running (designator)
-  (:documentation "Each robot should define this function with its corresponding PMs.")
-  (:method (designator)
-    (cpl:fail "PERFORM-WITH-PMS-RUNNING is not defined for this robot. Please do!")))
-
 (defvar *performing-threads* nil)
 
 (defun stop-all-actions ()
   (roslisp:ros-info (common performing) "stopping all ~a threads" (length *performing-threads*))
-  ;; (maphash #'(lambda (tree-name task-tree)
-  ;;              (declare (ignore tree-name))
-  ;;              (when (cpl:task-tree-node-p task-tree)
-  ;;               (let* ((code (cpl:task-tree-node-effective-code
-  ;;                             (cdr (car (cpl:task-tree-node-children task-tree))))))
-  ;;                 (assert code () "Task tree node doesn't contain a CODE.")
-  ;;                 (assert (cpl:code-task code) () "Task tree code empty.")
-  ;;                 (cpl:evaporate (cpl:code-task code)))))
-  ;;          cpl-impl::*top-level-task-trees*)
+  (maphash #'(lambda (tree-name task-tree)
+               (declare (ignore tree-name))
+               (when (and (cpl:task-tree-node-p task-tree)
+                          (cpl:task-tree-node-children task-tree))
+                (let* ((code (cpl:task-tree-node-effective-code
+                              (cdr (car (cpl:task-tree-node-children task-tree))))))
+                  (assert code () "Task tree node doesn't contain a CODE.")
+                  (assert (cpl:code-task code) () "Task tree code empty.")
+                  (format t "EVAPORATING CHILDREN~%")
+                  (cpl:evaporate (cpl:code-task code)))))
+           cpl-impl::*top-level-task-trees*)
   (mapc (lambda (thread)
           (when (sb-thread:thread-alive-p thread)
             (sb-thread:terminate-thread thread)))
@@ -92,13 +88,13 @@
              (stop-all-actions)
              (roslisp:make-response :result (format nil "Stopping all actions.")))
             (progn
-              (when (some #'(lambda (process-module-name)
-                              (cpm::check-process-module-running process-module-name :throw-error nil))
-                          (cpm:get-process-module-names))
-                (roslisp:ros-info (common perform-server) "Agent already has goals. Cancelling.")
-                (stop-all-actions)
-                (cpl:sleep 1) ; give one second to kill all threads
-                )
+              ;; (when (some #'(lambda (process-module-name)
+              ;;                 (cpm::check-process-module-running process-module-name :throw-error nil))
+              ;;             (cpm:get-process-module-names))
+              ;;   (roslisp:ros-info (common perform-server) "Agent already has goals. Cancelling.")
+              ;;   (stop-all-actions)
+              ;;   (cpl:sleep 1) ; give one second to kill all threads
+              ;;   )
               (let ((worker-thread nil)
                     (result nil))
                 (setf worker-thread
@@ -106,7 +102,8 @@
                        (lambda ()
                          (handler-case
                              (progn
-                               (setf result (perform-with-pms-running parsed-designator)))
+                               (setf result (cpl-impl::named-top-level (:name red-wasp-tasks)
+                                              (perform parsed-designator))))
                            (condition (error-object)
                              (format t "CONDITION: ~a~%" error-object)
                              (setf result error-object)))

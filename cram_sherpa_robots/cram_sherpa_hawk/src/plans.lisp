@@ -29,13 +29,12 @@
 
 (in-package :hawk)
 
-(defmethod perform-with-pms-running ((designator desig:designator))
+(defmethod main ()
   (cpm:with-process-modules-running
-      (hawk-sensors
-       helicopter:helicopter-actuators
-       robots-common:robosherlock-pm)
-    (cpl:top-level
-      (perform designator))))
+      (hawk-sensors helicopter:helicopter-actuators robosherlock-pm)
+    (run-reference-server "hawk")
+    (run-perform-server "hawk")
+    (roslisp:spin-until nil 100)))
 
 ;; (defun search-for-victim (?where)
 ;;   (perform (desig:a motion (to switch) (device camera) (state on)))

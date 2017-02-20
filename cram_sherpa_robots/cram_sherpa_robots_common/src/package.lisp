@@ -36,7 +36,6 @@
    ;; action-designator-server
    #:main
    #:run-reference-server
-   #:perform-with-pms-running
    #:run-perform-server
    ;; action-json-parser
    #:*show-json-warnings*

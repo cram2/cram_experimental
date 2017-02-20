@@ -29,13 +29,12 @@
 
 (in-package :blue-wasp)
 
-(defmethod perform-with-pms-running ((designator desig:designator))
+(defmethod main ()
   (cpm:with-process-modules-running
-      (blue-wasp-sensors
-       helicopter:helicopter-actuators
-       robots-common:robosherlock-pm)
-    (cpl:top-level
-      (perform designator))))
+      (blue-wasp-sensors helicopter:helicopter-actuators robosherlock-pm)
+    (run-reference-server "blue_wasp")
+    (run-perform-server "blue_wasp")
+    (roslisp:spin-until nil 100)))
 
 ;; (defun search-for-victim (?where)
 ;;   (perform (desig:a motion (to switch) (device camera) (state on)))
