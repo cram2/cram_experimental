@@ -32,7 +32,7 @@
 (defparameter *robosherlock-action-name* "RoboSherlock/sherpa_color_object")
 (defparameter *robosherlock-action-type* "iai_robosherlock_msgs/HighlightObjectAction")
 
-(defparameter *robosherlock-action-timeout* 5
+(defparameter *robosherlock-action-timeout* 5000000000
   "How many seconds to wait before returning from the robosherlock action.")
 
 (defvar *robosherlock-action-client* nil)
