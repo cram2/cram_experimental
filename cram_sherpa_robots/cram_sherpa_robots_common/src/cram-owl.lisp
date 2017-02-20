@@ -122,17 +122,16 @@
   (roslisp:ros-info (robots-common logging-client) "Calling CALL-LOGGING-ACTION")
   (when *logging-enabled*
     (unless action-timeout (setf action-timeout *logging-action-timeout*))
-    (multiple-value-bind (result status)
-        (cpl:with-failure-handling
-            ((simple-error (e)
-               (format t "Actionlib error occured!~%~a~%Reinitializing...~%~%" e)
-               (init-logging-action-client)
-               (cpl:retry)))
-          (let ((actionlib:*action-server-timeout* 10.0))
-            (actionlib:call-goal
-             (get-logging-action-client) action-goal :timeout action-timeout)))
-      (print result)
-      status)))
+    (nth-value
+     1
+     (cpl:with-failure-handling
+         ((simple-error (e)
+            (format t "Actionlib error occured!~%~a~%Reinitializing...~%~%" e)
+            (init-logging-action-client)
+            (cpl:retry)))
+       (let ((actionlib:*action-server-timeout* 10.0))
+         (actionlib:call-goal
+          (get-logging-action-client) action-goal :timeout action-timeout))))))
 
 (defun make-property-msg (name &key resource type value)
   (declare (type string name)
@@ -248,7 +247,7 @@
     NIL))
 
 (defmethod log-owl :before (object &key &allow-other-keys)
-  (format t "LOGGING OBJECT: ~a~%" object))
+  (roslisp:ros-info (common owl) "Logging object: ~a~%" object))
 
 (defmethod log-owl ((designator action-designator) &key start-time agent)
   (log-owl-action
@@ -476,11 +475,13 @@
   (log-owl-action :scan designator :start-time start-time :agent agent))
 
 (defmethod log-owl-action ((type (eql :look-for)) designator &key start-time agent)
-  (let ((cram-object (desig:desig-prop-value designator :object)))
+  (let ((object (desig:desig-prop-value designator :object)))
     (call-logging-action
      (loggable-action
       type start-time NIL T agent
-      (loggable-property-with-resource :|objectActedOn| (cram-owl-name cram-object :class))))))
+      (loggable-property-with-resource :|objectActedOn| (if (keywordp object)
+                                                            (cram-owl-name object :class)
+                                                            object))))))
 
 (defmethod log-owl-action ((type (eql :looking-for)) designator &key start-time agent)
   (log-owl-action :mount designator :start-time start-time :agent agent))
@@ -498,9 +499,7 @@
       image-name
       (loggable-image-type)
       (vector (loggable-property-with-resource :|captureTime| (loggable-timepoint end-time))
-              (loggable-property-with-value :|rosTopic| (namespaced :xsd "string") ""
-                                            ;; "Robosherlock/output_image"
-                                            )
+              (loggable-property-with-value :|rosTopic| (namespaced :xsd "string") "RoboSherlock/output_image")
               (loggable-property-with-value :|linkToImageFile| (namespaced :xsd "string") ""))))))
 
 (defmethod log-owl-action ((type (eql :taking-picture)) designator &key start-time agent)
