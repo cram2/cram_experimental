@@ -29,7 +29,7 @@
 
 (in-package :robots-common)
 
-(defparameter *logging-enabled* nil)
+(defparameter *logging-enabled* t)
 
 (defparameter *unique-id-length* 14
   "How many characters to append to create unique IDs for OWL individuals")
@@ -76,7 +76,9 @@
 (defparameter *logging-namespace-default* "knowrob")
 
 (defgeneric log-owl (object &key &allow-other-keys)
-  (:documentation "call logging action on `object'"))
+  (:documentation "call logging action on `object'")
+  (:method ((object null) &key &allow-other-keys)
+    (roslisp:ros-info (common owl) "Got a NIL object to log. Ignoring.")))
 
 (defparameter *logging-action-name* "ue_semlog/LogEvent")
 (defparameter *logging-action-type* "sherpa_msgs/LogEventAction")
