@@ -78,7 +78,8 @@
   (<- (action-desig ?action-designator (scan ?area))
     (or (desig-prop ?action-designator (:type :scanning))
         (desig-prop ?action-designator (:to :scan)))
-    (desig-prop ?action-designator (:area ?area)))
+    (desig-prop ?action-designator (:area ?area-name-string))
+    (lisp-fun robots-common:owl-object-bounding-box ?area-name-string ?area))
 
   (<- (action-desig ?action-designator (continuously-perceive ?object-name))
     (or (desig-prop ?action-designator (:type :looking-for))

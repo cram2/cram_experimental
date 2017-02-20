@@ -32,6 +32,9 @@
 (defparameter *visibility-range* 0.4
   "Radius that camera can see while scanning. In meters")
 
+(defparameter *navigation-altitude* 5
+  "In meters. Will be changed into a Prolog rule.")
+
 ;;; Might as well use def-cram-function-s but they're not as convenient
 
 (defun land (?pose)
@@ -55,16 +58,22 @@ E.g. (#<3D-VECTOR (d w h)> #<POSE-STAMPED ('frame' stamp (x y z) (q1 q2 q3 w))>)
   (destructuring-bind (dimensions stamped-pose)
       area
     (flet ((make-coordinate (x y theta)
-             (cl-transforms-stamped:pose->pose-stamped
-              (cl-transforms-stamped:frame-id stamped-pose)
-              (cl-transforms-stamped:stamp stamped-pose)
-              (cl-transforms:transform
-               (cl-transforms:pose->transform stamped-pose)
-               (cl-transforms:make-pose
-                (cl-transforms:make-3d-vector x y 0)
-                (cl-transforms:axis-angle->quaternion
-                 (cl-transforms:make-3d-vector 0 0 1)
-                 theta))))))
+             (let ((frame-id (if (typep stamped-pose 'cl-transforms-stamped:pose-stamped)
+                                 (cl-transforms-stamped:frame-id stamped-pose)
+                                 cram-tf:*fixed-frame*))
+                   (stamp (if (typep stamped-pose 'cl-transforms-stamped:pose-stamped)
+                              (cl-transforms-stamped:stamp stamped-pose)
+                              0.0)))
+              (cl-transforms-stamped:pose->pose-stamped
+               frame-id
+               stamp
+               (cl-transforms:transform
+                (cl-transforms:pose->transform stamped-pose)
+                (cl-transforms:make-pose
+                 (cl-transforms:make-3d-vector x y 0)
+                 (cl-transforms:axis-angle->quaternion
+                  (cl-transforms:make-3d-vector 0 0 1)
+                  theta)))))))
       (let* ((dimensions/2 (cl-transforms:v* dimensions 0.5))
              (initial-goal-y (- delta (cl-transforms:y dimensions/2)))
              (initial-goal-x (- delta (cl-transforms:x dimensions/2))))
@@ -80,6 +89,8 @@ E.g. (#<3D-VECTOR (d w h)> #<POSE-STAMPED ('frame' stamp (x y z) (q1 q2 q3 w))>)
 E.g. (#<3D-VECTOR (d w h)> #<POSE-STAMPED ('frame' stamp (x y z) (q1 q2 q3 w))>)"
   (declare (type list area))
   (format t "scan ~a~%" area)
+  (let ((?altitude *navigation-altitude*))
+    (perform (an action (to take-off) (to ?altitude))))
   (mapc (lambda (?goal)
           (perform (a motion (to fly) (to ?goal))))
         (calculate-area-via-points area *visibility-range*)))
@@ -88,9 +99,6 @@ E.g. (#<3D-VECTOR (d w h)> #<POSE-STAMPED ('frame' stamp (x y z) (q1 q2 q3 w))>)
   (format t "continuously-perceive ~a~%" object-name)
   ;; TODO
   )
-
-(defparameter *navigation-altitude* 5
-  "In meters. Will be changed into a Prolog rule.")
 
 (defun navigate (?location)
   (format t "go ~a~%" ?location)

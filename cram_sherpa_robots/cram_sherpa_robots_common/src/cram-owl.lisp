@@ -155,7 +155,9 @@
    :rdf_entries property-msgs))
 
 
-;;; TODO: macro to wrap perform action designator in logging
+
+
+
 
 (defun namespaced (namespace string)
   (concatenate 'string (cadr (assoc namespace *owl-namespaces*)) string))
@@ -200,14 +202,33 @@
 
 (defun owl-individual-of-class (class)
   (let ((name (cut:var-value
-               :?name
+               '?name
                (car
                 (json-prolog:prolog
                  `("owl_individual_of" ?name ,class)
-                 :package :keyword)))))
+                 :package :robots-common)))))
     (if (cut:is-var name)
         NIL
         (string-trim "'" (symbol-name name)))))
+
+(defun owl-object-bounding-box (owl-name)
+  "Returns list of (<3dvector> <pose>)."
+  (let ((owl-namespaced-name (namespaced :log owl-name)))
+    (cut:with-vars-bound (?pose ?dim)
+        (cut:lazy-car
+         (json-prolog:prolog
+          `(and ("current_object_pose" ,owl-namespaced-name ?pose)
+                ("object_dimensions" ,owl-namespaced-name ?d ?w ?h)
+                (= '(?d ?w ?h) ?dim))
+          :package :robots-common))
+      (if (or (cut:is-var ?pose) (cut:is-var ?dim))
+          NIL
+          (list (apply #'cl-transforms:make-3d-vector ?dim)
+                (destructuring-bind (x y z q1 q2 q3 w)
+                    ?pose
+                  (cl-transforms:make-pose
+                   (cl-transforms:make-3d-vector x y z)
+                   (cl-transforms:make-quaternion q1 q2 q3 w))))))))
 
 (defun loggable-robot-type (cram-robot-type)
   (declare (type symbol cram-robot-type))

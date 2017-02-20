@@ -41,6 +41,12 @@
    #:*show-json-warnings*
    #:json-key-not-supported
    #:json-parser-failed
+   ;; cram-owl
+   #:*logging-enabled*
+   #:log-owl
+   #:cram-owl-name
+   #:owl-individual-of-class
+   #:owl-object-bounding-box
    ;; low-level-action-clients
    #:define-action-client
    #:make-mount-goal
