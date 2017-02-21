@@ -25,4 +25,5 @@
   <depend>iai_robosherlock_msgs</depend>
   <depend>cram_json_prolog</depend>
   <depend>cram_utilities</depend>
+  <depend>cram_location_costmap</depend>
 </package>

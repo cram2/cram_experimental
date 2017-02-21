@@ -50,17 +50,18 @@
                iai_robosherlock_msgs-msg ; for communicating to robosherlock
                cram-json-prolog ; for logging
                cram-utilities ; for json-prolog var-value
-               )
+               cram-location-costmap)
 
   :components
   ((:module "src"
     :components
     ((:file "package")
+     (:file "costmap-test" :depends-on ("package"))
+     (:file "utils" :depends-on ("package"))
      (:file "cram-owl" :depends-on ("package" "utils"))
      (:file "plan-library" :depends-on ("package" "cram-owl"))
      (:file "prolog" :depends-on ("package"))
      (:file "action-json-parser" :depends-on ("package"))
-     (:file "utils" :depends-on ("package"))
      (:file "action-designator-server" :depends-on ("package" "action-json-parser" "utils"))
      (:file "define-action-client-and-make-goals" :depends-on ("package" "utils"))
      (:file "robosherlock-action" :depends-on ("package" "plan-library" "utils"
