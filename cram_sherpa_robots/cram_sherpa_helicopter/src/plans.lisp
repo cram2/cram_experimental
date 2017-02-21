@@ -95,13 +95,14 @@ E.g. (#<3D-VECTOR (d w h)> #<POSE-STAMPED ('frame' stamp (x y z) (q1 q2 q3 w))>)
           (perform (a motion (to fly) (to ?goal))))
         (calculate-area-via-points area *visibility-range*)))
 
-(defun continuously-perceive (object-name)
-  (format t "continuously-perceive ~a~%" object-name)
-  ;; TODO
-  )
-
 (defun navigate (?location)
   (format t "go ~a~%" ?location)
   (let ((?altitude *navigation-altitude*))
     (perform (an action (to take-off) (to ?altitude))))
   (perform (a motion (to fly) (to ?location))))
+
+(defun sherpa-search (?object ?area)
+  (format t "search for ~a at ~a~%" ?object ?area)
+  (cpl:par
+    (perform (an action (to scan) (area ?area)))
+    (perform (an action (to look-for) (object ?object)))))

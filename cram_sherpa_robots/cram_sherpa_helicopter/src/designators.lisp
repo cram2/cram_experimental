@@ -81,15 +81,16 @@
     (desig-prop ?action-designator (:area ?area-name-string))
     (lisp-fun robots-common:owl-object-bounding-box ?area-name-string ?area))
 
-  (<- (action-desig ?action-designator (continuously-perceive ?object-name))
-    (or (desig-prop ?action-designator (:type :looking-for))
-        (desig-prop ?action-designator (:to :look-for)))
-    (desig-prop ?action-designator (:object ?object-name)))
-
   (<- (action-desig ?action-designator (navigate ?pose))
     (or (desig-prop ?action-designator (:type :going))
         (desig-prop ?action-designator (:to :go)))
     (or (desig-prop ?action-designator (:destination ?location))
         (and (desig-prop ?action-designator (:to ?location))
              (not (equal ?location :go))))
-    (location-pose ?location ?pose)))
+    (location-pose ?location ?pose))
+
+  (<- (action-desig ?action-designator (sherpa-search ?object ?area))
+    (or (desig-prop ?action-designator (:type :searching))
+        (desig-prop ?action-designator (:to :search)))
+    (desig-prop ?action-designator (:area ?area))
+    (desig-prop ?action-designator (:object ?object))))

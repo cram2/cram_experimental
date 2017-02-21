@@ -96,12 +96,13 @@
   (<- (motion-desig ?motion-designator (look-for ?object-name))
     (or (desig-prop ?motion-designator (:type :looking-for))
         (desig-prop ?motion-designator (:to :look-for)))
-    (desig-prop ?motion-designator (:object ?object-name)))
+    (desig-prop ?motion-designator (:object ?object-cram-name))
+    (lisp-fun cram-owl-name ?object-cram-name ?object-name))
+
   (<- (action-desig ?action-designator (look-for ?object-name))
     (or (desig-prop ?action-designator (:type :looking-for))
         (desig-prop ?action-designator (:to :look-for)))
-    (desig-prop ?action-designator (:object ?object-cram-name))
-    (lisp-fun cram-owl-name ?object-cram-name ?object-name)))
+    (desig-prop ?action-designator (:object ?object-name))))
 
 (def-fact-group robosherlock-pm (cpm:matching-process-module cpm:available-process-module)
   (<- (cpm:matching-process-module ?motion-designator robosherlock-pm)
