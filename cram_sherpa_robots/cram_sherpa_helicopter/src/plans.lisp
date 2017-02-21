@@ -29,10 +29,10 @@
 
 (in-package :helicopter)
 
-(defparameter *visibility-range* 0.4
+(defparameter *visibility-range* 5.0
   "Radius that camera can see while scanning. In meters")
 
-(defparameter *navigation-altitude* 5
+(defparameter *navigation-altitude* 10
   "In meters. Will be changed into a Prolog rule.")
 
 ;;; Might as well use def-cram-function-s but they're not as convenient
@@ -68,12 +68,17 @@ E.g. (#<3D-VECTOR (d w h)> #<POSE-STAMPED ('frame' stamp (x y z) (q1 q2 q3 w))>)
                frame-id
                stamp
                (cl-transforms:transform
-                (cl-transforms:pose->transform stamped-pose)
+                (cl-transforms:pose->transform
+                 (cl-transforms:copy-pose
+                  stamped-pose
+                  :orientation (cl-transforms:make-identity-rotation)))
                 (cl-transforms:make-pose
                  (cl-transforms:make-3d-vector x y 0)
-                 (cl-transforms:axis-angle->quaternion
-                  (cl-transforms:make-3d-vector 0 0 1)
-                  theta)))))))
+                 (cl-transforms:make-identity-rotation)
+                 ;; (cl-transforms:axis-angle->quaternion
+                 ;;  (cl-transforms:make-3d-vector 0 0 1)
+                 ;;  theta)
+                 ))))))
       (let* ((dimensions/2 (cl-transforms:v* dimensions 0.5))
              (initial-goal-y (- delta (cl-transforms:y dimensions/2)))
              (initial-goal-x (- delta (cl-transforms:x dimensions/2))))
