@@ -108,6 +108,6 @@ E.g. (#<3D-VECTOR (d w h)> #<POSE-STAMPED ('frame' stamp (x y z) (q1 q2 q3 w))>)
 
 (defun sherpa-search (?object ?area)
   (format t "search for ~a at ~a~%" ?object ?area)
-  (cpl:par
+  (cpl:pursue
     (perform (an action (to scan) (area ?area)))
     (perform (an action (to look-for) (object ?object)))))
