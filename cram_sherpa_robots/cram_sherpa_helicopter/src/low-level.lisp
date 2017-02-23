@@ -27,23 +27,19 @@
 ;;; ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 ;;; POSSIBILITY OF SUCH DAMAGE.
 
-(in-package :red-wasp)
+(in-package :helicopter)
 
-(def-fact-group red-wasp-motions (desig:motion-desig)
+(defvar *display-command-pub* nil "ROS publisher for /display_command")
 
-  (<- (desig:motion-desig ?motion-designator (switch-beacon ?on-or-off))
-    (or (desig:desig-prop ?motion-designator (:type :switching))
-        (desig:desig-prop ?motion-designator (:to :switch)))
-    (desig:desig-prop ?motion-designator (:device :beacon))
-    (or (and (desig:desig-prop ?motion-designator (:state :on))
-             (equal ?on-or-off T))
-        (and (desig:desig-prop ?motion-designator (:state :off))
-             (equal ?on-or-off NIL)))))
+(defun init-display-command-pub ()
+  (setf *display-command-pub* (roslisp:advertise "/display_command" "std_msgs/String")))
 
-(def-fact-group red-wasp-actions (desig:action-desig)
+(defun destroy-display-command-pub ()
+  (setf *display-command-pub* nil))
 
-  (<- (desig:action-desig ?action-designator (beacon-search ?object ?area))
-    (or (desig:desig-prop ?action-designator (:type :searching))
-        (desig:desig-prop ?action-designator (:to :search)))
-    (desig:desig-prop ?action-designator (:area ?area))
-    (desig:desig-prop ?action-designator (:object ?object))))
+(roslisp-utilities:register-ros-init-function init-display-command-pub)
+(roslisp-utilities:register-ros-cleanup-function destroy-display-command-pub)
+
+(defun say (some-string)
+  (roslisp:publish *display-command-pub*
+                   (roslisp:make-message "std_msgs/String" :data some-string)))

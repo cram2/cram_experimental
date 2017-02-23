@@ -34,4 +34,7 @@
   (:use #:common-lisp #:cram-prolog #:cram-designators #:cram-sherpa-robots-common)
   (:export #:helicopter-bullet-projection-environment
            ;; process-modules
-           #:helicopter-actuators))
+           #:helicopter-actuators
+           ;; low-level
+           #:say
+           ))

@@ -32,7 +32,7 @@
 (defparameter *visibility-range* 5.0
   "Radius that camera can see while scanning. In meters")
 
-(defparameter *navigation-altitude* 10
+(defparameter *navigation-altitude* 20
   "In meters. Will be changed into a Prolog rule.")
 
 ;;; Might as well use def-cram-function-s but they're not as convenient
@@ -46,9 +46,11 @@
   (perform (a motion (to switch) (device engine) (state off))))
 
 (defun take-off (?altitude)
-  (declare (type number ?altitude))
+  (declare (type (or null number) ?altitude))
   (format t "take-off ~a~%" ?altitude)
   (perform (a motion (to switch) (device engine) (state on)))
+  (unless ?altitude
+    (setf ?altitude *navigation-altitude*))
   (perform (a motion (to set-altitude) (to ?altitude))))
 
 (defun calculate-area-via-points (area delta)
@@ -105,9 +107,3 @@ E.g. (#<3D-VECTOR (d w h)> #<POSE-STAMPED ('frame' stamp (x y z) (q1 q2 q3 w))>)
   (let ((?altitude *navigation-altitude*))
     (perform (an action (to take-off) (to ?altitude))))
   (perform (a motion (to fly) (to ?location))))
-
-(defun sherpa-search (?object ?area)
-  (format t "search for ~a at ~a~%" ?object ?area)
-  (cpl:pursue
-    (perform (an action (to scan) (area ?area)))
-    (perform (an action (to look-for) (object ?object)))))

@@ -39,4 +39,25 @@
 (define-action-client red-wasp toggle-engine "sherpa_msgs/ToggleActuatorAction" 5)
 (define-action-client red-wasp toggle-beacon "sherpa_msgs/ToggleActuatorAction" 5)
 
+(defvar *beacon-msg-fluent* (cpl:make-fluent :name :beacon-msg-fluent)
+  "msg coming on the beacon topic")
+(defvar *beacon-sub* nil "ROS subscriber for /red_wasp/beacon")
+
+(defun beacon-callback (beacon-msg)
+  (when beacon-msg
+    (setf (cpl:value *beacon-msg-fluent*) beacon-msg)))
+
+(defun init-beacon-sub ()
+  "Subscribes to topics for a turtle and binds callbacks.
+`name' specifies the name of the turtle."
+  (setf *beacon-sub* (roslisp:subscribe "red_wasp/beacon" 'sherpa_msgs-msg:beacon
+                                        #'beacon-callback)))
+
+(defun destroy-beacon-sub ()
+  (setf *beacon-sub* nil)
+  (setf *beacon-msg-fluent* (cpl:make-fluent :name :beacon-msg-fluent)))
+
+(roslisp-utilities:register-ros-init-function init-beacon-sub)
+(roslisp-utilities:register-ros-cleanup-function destroy-beacon-sub)
+
 

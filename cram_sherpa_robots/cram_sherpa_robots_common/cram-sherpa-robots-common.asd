@@ -56,7 +56,7 @@
   ((:module "src"
     :components
     ((:file "package")
-     (:file "costmap-test" :depends-on ("package"))
+     ;; (:file "costmap-test" :depends-on ("package"))
      (:file "utils" :depends-on ("package"))
      (:file "cram-owl" :depends-on ("package" "utils"))
      (:file "plan-library" :depends-on ("package" "cram-owl"))

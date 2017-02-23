@@ -47,4 +47,4 @@
      (:file "low-level" :depends-on ("package"))
      (:file "designators" :depends-on ("package"))
      (:file "process-modules" :depends-on ("package" "low-level" "designators"))
-     (:file "plans" :depends-on ("package" "process-modules" "designators"))))))
+     (:file "plans" :depends-on ("package" "low-level" "process-modules" "designators"))))))

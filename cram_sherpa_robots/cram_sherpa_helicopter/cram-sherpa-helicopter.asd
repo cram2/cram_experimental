@@ -39,14 +39,18 @@
                cram-designators
                cram-projection
                cram-sherpa-robots-common
+               roslisp
                roslisp-utilities
                cram-bullet-reasoning
-               cram-bullet-reasoning-utilities)
+               cram-bullet-reasoning-utilities
+               std_msgs-msg ; for publishing on display_command topic
+               )
 
   :components
   ((:module "src"
     :components
     ((:file "package")
+     (:file "low-level" :depends-on ("package"))
      (:file "designators" :depends-on ("package"))
      (:file "bullet-utils" :depends-on ("package"))
      (:file "process-modules" :depends-on ("package" "designators"))
