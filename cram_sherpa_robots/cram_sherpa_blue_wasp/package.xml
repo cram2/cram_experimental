@@ -14,4 +14,5 @@
   <depend>cram_robot_interfaces</depend>
   <depend>cram_sherpa_robots_common</depend>
   <depend>roslisp</depend>
+  <depend>cram_json_prolog</depend>
 </package>

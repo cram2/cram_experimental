@@ -29,6 +29,14 @@
 
 (in-package :blue-wasp)
 
+(defmethod main ()
+  (cpm:with-process-modules-running
+      (blue-wasp-sensors helicopter:helicopter-actuators robosherlock-pm)
+    (run-reference-server "blue_wasp")
+    (run-perform-server "blue_wasp")
+    (roslisp:spin-until nil 100)))
+
+
 (defparameter *pub-transmit* nil)
 (defun ensure-transmit-pub ()
   (unless *pub-transmit*
@@ -38,19 +46,6 @@
 (defun clear-transmit-pub ()
   (setf *pub-transmit* nil))
 (roslisp-utilities:register-ros-cleanup-function clear-transmit-pub)
-
-(defmethod perform-with-pms-running ((designator desig:designator))
-  (cpm:with-process-modules-running
-      (blue-wasp-sensors
-       helicopter:helicopter-actuators
-       robots-common:robosherlock-pm)
-    (cpl:top-level
-      (perform designator))))
-
-;; (defun search-for-victim (?where)
-;;   (perform (desig:a motion (to switch) (device camera) (state on)))
-;;   (find-victim)
-;;   (land-or-whatever))
 
 (defun can-send ()
   (let* ((query-string (format nil "action_feasible_on_robot(knowrob:'SendingAHighResPicture', [an, action, [type, sending_a_high_res_picture]], knowrob:'SherpaWaspBlue_ILQN')."))
@@ -79,3 +74,11 @@
       (move-closer)))
   (transmit-image))
 
+(defun sherpa-search (?object ?area)
+  (format t "search for ~a at ~a~%" ?object ?area)
+  (cpl:pursue
+    (cpl:seq
+      (perform (desig:an action (to scan) (area ?area)))
+      (helicopter:say (format nil "Blue Wasp FOUND ~a." ?object))
+      (perform (desig:an action (to take-picture))))
+    (perform (desig:an action (to look-for) (object ?object)))))
