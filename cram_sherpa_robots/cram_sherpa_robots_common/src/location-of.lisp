@@ -29,12 +29,31 @@
 
 (in-package :robots-common)
 
-(def-fact-group sherpa-utils ()
+(defun get-object-pose (object-name)
+  (let ((tf-frame (typecase object-name
+                    (keyword (case object-name
+                               (:victim "victim")
+                               (:kite "hang_glider")
+                               (t nil)))
+                    (string (concatenate 'string object-name "/base_link"))
+                    (t nil))))
+    (when tf-frame
+      (cl-transforms-stamped:lookup-transform
+       cram-tf:*transformer*
+       cram-tf:*fixed-frame*
+       tf-frame
+       :time 0.0
+       :timeout cram-tf:*tf-default-timeout*))))
 
-  (<- (terrain-name terrain))
+(def-fact-group location-designator-generators (desig-solution)
+  (<- (desig-solution ?desig ?solution)
+    (loc-desig? ?desig)
+    (desig-prop ?desig (:of ?obj))
+    (lisp-type ?obj string)
+    (lisp-fun get-object-pose ?obj ?solution))
 
-  (<- (location-pose ?location ?pose)
-    (-> (lisp-type ?location designator)
-        (desig-reference ?location ?pose)
-        (or (cram-tf:pose ?pose ?location)
-            (equal ?location ?pose)))))
+  (<- (desig-solution ?desig ?solution)
+    (loc-desig? ?desig)
+    (desig-prop ?desig (:of ?obj))
+    (lisp-type ?obj keyword)
+    (lisp-fun get-object-pose ?obj ?solution)))
