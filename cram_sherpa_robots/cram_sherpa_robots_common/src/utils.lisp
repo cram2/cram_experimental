@@ -115,3 +115,16 @@
                         #'roslisp::convert-to-keyword
                         (roslisp::designated-list arg))
                     arg))))
+
+
+(def-fact-group sherpa-utils ()
+
+  (<- (terrain-name terrain))
+
+  (<- (location-pose ?location ?pose)
+    (-> (lisp-type ?location designator)
+        ;; (desig-reference ?location ?pose)
+        (and (desig-solutions ?location ?poses)
+             (member ?pose ?poses))
+        (or (cram-tf:pose ?pose ?location)
+            (equal ?location ?pose)))))
