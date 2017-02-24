@@ -30,25 +30,25 @@
 (in-package :robots-common)
 
 (defun get-object-pose (object-name)
-  (let ((tf-frame (typecase object-name
-                    (keyword (case object-name
-                               (:victim "victim")
-                               (:kite "hang_glider")
-                               (t nil)))
-                    (string (concatenate 'string object-name "/base_link"))
-                    (t nil))))
-    (when tf-frame
-      (let ((object-transform (cl-transforms-stamped:lookup-transform
-                               cram-tf:*transformer*
-                               cram-tf:*fixed-frame*
-                               tf-frame
-                               :time 0.0
-                               :timeout cram-tf:*tf-default-timeout*)))
-        (cl-transforms-stamped:make-pose-stamped
-         cram-tf:*fixed-frame*
-         (cl-transforms-stamped:stamp object-transform)
-         (cl-transforms-stamped:translation object-transform)
-         (cl-transforms-stamped:rotation object-transform))))))
+  (typecase object-name
+    (keyword ;; (case object-name
+     ;;   (:victim "victim")
+     ;;   (:kite "hang_glider")
+     ;;   (t nil))
+     (get-found-object-pose object-name))
+    (string (let* ((tf-frame (concatenate 'string object-name "/base_link"))
+                   (object-transform (cl-transforms-stamped:lookup-transform
+                                      cram-tf:*transformer*
+                                      cram-tf:*fixed-frame*
+                                      tf-frame
+                                      :time 0.0
+                                      :timeout cram-tf:*tf-default-timeout*)))
+              (cl-transforms-stamped:make-pose-stamped
+               cram-tf:*fixed-frame*
+               (cl-transforms-stamped:stamp object-transform)
+               (cl-transforms-stamped:translation object-transform)
+               (cl-transforms-stamped:rotation object-transform))))
+    (t nil)))
 
 (def-fact-group location-designator-generators (desig-solution)
   (<- (desig-solution ?desig ?solution)
