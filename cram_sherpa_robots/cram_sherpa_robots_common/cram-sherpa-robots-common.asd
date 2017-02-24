@@ -50,7 +50,8 @@
                iai_robosherlock_msgs-msg ; for communicating to robosherlock
                cram-json-prolog ; for logging
                cram-utilities ; for json-prolog var-value
-               cram-location-costmap)
+               cram-location-costmap
+               cram-sherpa-spatial-relations)
 
   :components
   ((:module "src"
