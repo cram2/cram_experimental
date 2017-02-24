@@ -83,7 +83,7 @@
 (defparameter *logging-action-name* "ue_semlog/LogEvent")
 (defparameter *logging-action-type* "sherpa_msgs/LogEventAction")
 
-(defparameter *logging-action-timeout* 3
+(defparameter *logging-action-timeout* 5
   "How many seconds to wait before returning from the logging action.")
 
 (defvar *logging-action-client* nil)
