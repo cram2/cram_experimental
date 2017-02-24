@@ -39,6 +39,10 @@
 (defun take-picture ()
   (perform (desig:a motion (to take-picture))))
 
+(defun look-for (?object-name)
+  (perform (desig:an action (to take-picture)))
+  (perform (desig:a motion (to look-for) (object ?object-name))))
+
 (defun sherpa-search (?object ?area)
   (format t "search for ~a at ~a~%" ?object ?area)
   (cpl:pursue

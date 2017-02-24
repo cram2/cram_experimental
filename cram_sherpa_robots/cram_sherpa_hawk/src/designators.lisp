@@ -50,6 +50,11 @@
     (or (desig:desig-prop ?action-designator (:type :taking-picture))
         (desig:desig-prop ?action-designator (:to :take-picture))))
 
+  (<- (desig:action-desig ?action-designator (look-for ?object-name))
+    (or (desig:desig-prop ?action-designator (:type :looking-for))
+        (desig:desig-prop ?action-designator (:to :look-for)))
+    (desig:desig-prop ?action-designator (:object ?object-name)))
+
   (<- (desig:action-desig ?action-designator (sherpa-search ?object ?area))
     (or (desig:desig-prop ?action-designator (:type :searching))
         (desig:desig-prop ?action-designator (:to :search)))
