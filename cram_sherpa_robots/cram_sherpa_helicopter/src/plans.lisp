@@ -98,7 +98,7 @@ E.g. (#<3D-VECTOR (d w h)> #<POSE-STAMPED ('frame' stamp (x y z) (q1 q2 q3 w))>)
     (perform (an action (to take-off) (to ?altitude))))
   (mapc (lambda (?goal)
           (perform (a motion (to fly) (to ?goal))))
-        (calculate-area-via-points area *visibility-range*)))
+        (calculate-area-via-points area (/ *navigation-altitude* 2))))
 
 (defun navigate (?location)
   (format t "go ~a~%" ?location)
