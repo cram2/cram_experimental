@@ -59,6 +59,7 @@
     ((:file "package")
      ;; (:file "costmap-test" :depends-on ("package"))
      (:file "utils" :depends-on ("package"))
+     (:file "belief-state" :depends-on ("package"))
      (:file "cram-owl" :depends-on ("package" "utils"))
      (:file "plan-library" :depends-on ("package" "cram-owl"))
      (:file "location-of" :depends-on ("package"))
@@ -67,4 +68,4 @@
      (:file "define-action-client-and-make-goals" :depends-on ("package" "utils"))
      (:file "robosherlock-action" :depends-on ("package" "plan-library" "utils"
                                                          "cram-owl" ; for mapping cram to RS names
-                                                         ))))))
+                                                         "belief-state"))))))

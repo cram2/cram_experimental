@@ -62,6 +62,9 @@
    #:terrain-name #:terrain
    ;; robosherlock-action
    #:robosherlock-pm
+   ;; belief-state
+   #:*found-objects*
+   #:object-found
    ;; utils
    #:try-reference-designator-json
    #:current-robot-symbol
