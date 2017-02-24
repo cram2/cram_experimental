@@ -29,11 +29,23 @@
 
 (in-package :helicopter)
 
-(defparameter *visibility-range* 5.0
-  "Radius that camera can see while scanning. In meters")
+(defparameter *navigation-default-altitude* 20 "In meters.")
 
-(defparameter *navigation-altitude* 20
-  "In meters. Will be changed into a Prolog rule.")
+(defun get-flight-altitude ()
+  (let* ((robot-owl-name (robots-common:loggable-robot-individual-name
+                          (robots-common:current-robot-symbol)))
+         (owl-flight-altitude (cut:var-value
+                               '?altitude
+                               (car
+                                (json-prolog:prolog
+                                 `("rdf_has" ,robot-owl-name
+                                             ,(robots-common:namespaced :knowrob
+                                                                        "nominalFlightAltitude")
+                                             ?altitude)
+                                 :package :helicopter)))))
+    (if (cut:is-var owl-flight-altitude)
+        *navigation-default-altitude*
+        (read-from-string (string-trim "'" (symbol-name (car (cddadr owl-flight-altitude))))))))
 
 ;;; Might as well use def-cram-function-s but they're not as convenient
 
@@ -50,7 +62,7 @@
   (format t "take-off ~a~%" ?altitude)
   (perform (a motion (to switch) (device engine) (state on)))
   (unless ?altitude
-    (setf ?altitude *navigation-altitude*))
+    (setf ?altitude (get-flight-altitude)))
   (perform (a motion (to set-altitude) (to ?altitude))))
 
 (defun calculate-area-via-points (area delta)
@@ -94,14 +106,14 @@ E.g. (#<3D-VECTOR (d w h)> #<POSE-STAMPED ('frame' stamp (x y z) (q1 q2 q3 w))>)
 E.g. (#<3D-VECTOR (d w h)> #<POSE-STAMPED ('frame' stamp (x y z) (q1 q2 q3 w))>)"
   (declare (type list area))
   (format t "scan ~a~%" area)
-  (let ((?altitude *navigation-altitude*))
-    (perform (an action (to take-off) (to ?altitude))))
-  (mapc (lambda (?goal)
+  (let ((?altitude (get-flight-altitude)))
+    (perform (an action (to take-off) (to ?altitude)))
+    (mapc (lambda (?goal)
           (perform (a motion (to fly) (to ?goal))))
-        (calculate-area-via-points area (/ *navigation-altitude* 2))))
+        (calculate-area-via-points area (/ ?altitude 2)))))
 
 (defun navigate (?location)
   (format t "go ~a~%" ?location)
-  (let ((?altitude *navigation-altitude*))
+  (let ((?altitude (get-flight-altitude)))
     (perform (an action (to take-off) (to ?altitude))))
   (perform (a motion (to fly) (to ?location))))

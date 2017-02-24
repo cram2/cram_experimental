@@ -47,6 +47,8 @@
    #:cram-owl-name
    #:owl-individual-of-class
    #:owl-object-bounding-box
+   #:loggable-robot-individual-name
+   #:namespaced
    ;; low-level-action-clients
    #:define-action-client
    #:make-mount-goal
