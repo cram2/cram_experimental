@@ -39,7 +39,7 @@
 (defparameter *pub-transmit* nil)
 (defun ensure-transmit-pub ()
   (unless *pub-transmit*
-    (setf *pub-transmit* (roslisp:advertise "blue_wasp/image_transmited" "std_msgs/bool"))
+    (setf *pub-transmit* (roslisp:advertise "blue_wasp/image_transmitted" "std_msgs/Bool"))
     (roslisp:wait-duration 1))
   *pub-transmit*)
 (defun clear-transmit-pub ()
@@ -52,6 +52,7 @@
     query-result))
 
 (defun move-closer ()
+  (roslisp:wait-duration 0.5)
   (let* ((wasp-tran (cl-tf:lookup-transform cram-tf:*transformer* "map" "blue_wasp/base_link"))
          (donkey-tran (cl-tf:lookup-transform cram-tf:*transformer* "map" "donkey/base_link"))
          (target-pose (cl-transforms-stamped:make-pose-stamped
