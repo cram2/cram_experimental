@@ -38,12 +38,17 @@
                     (string (concatenate 'string object-name "/base_link"))
                     (t nil))))
     (when tf-frame
-      (cl-transforms-stamped:lookup-transform
-       cram-tf:*transformer*
-       cram-tf:*fixed-frame*
-       tf-frame
-       :time 0.0
-       :timeout cram-tf:*tf-default-timeout*))))
+      (let ((object-transform (cl-transforms-stamped:lookup-transform
+                               cram-tf:*transformer*
+                               cram-tf:*fixed-frame*
+                               tf-frame
+                               :time 0.0
+                               :timeout cram-tf:*tf-default-timeout*)))
+        (cl-transforms-stamped:make-pose-stamped
+         cram-tf:*fixed-frame*
+         (cl-transforms-stamped:stamp object-transform)
+         (cl-transforms-stamped:translation object-transform)
+         (cl-transforms-stamped:rotation object-transform))))))
 
 (def-fact-group location-designator-generators (desig-solution)
   (<- (desig-solution ?desig ?solution)
