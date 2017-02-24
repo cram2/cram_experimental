@@ -76,7 +76,6 @@ E.g. (#<3D-VECTOR (d w h)> #<POSE-STAMPED ('frame' stamp (x y z) (q1 q2 q3 w))>)
                   :orientation (cl-transforms:make-identity-rotation)))
                 (cl-transforms:make-pose
                  (cl-transforms:make-3d-vector x y 0)
-;                 (cl-transforms:make-identity-rotation)
                  (cl-transforms:axis-angle->quaternion
                   (cl-transforms:make-3d-vector 0 0 1)
                   theta)))))))
@@ -87,8 +86,8 @@ E.g. (#<3D-VECTOR (d w h)> #<POSE-STAMPED ('frame' stamp (x y z) (q1 q2 q3 w))>)
               for goal-y = initial-goal-y then (* initial-goal-y goal-y-sign)
               for goal-x = initial-goal-x then (+ goal-x (* 2 delta))
               while (<= goal-x (cl-transforms:x dimensions/2))
-              collect (make-coordinate goal-x goal-y (* (/ pi 2) goal-y-sign))
-              collect (make-coordinate goal-x (- goal-y) 0.0))))))
+              collect (make-coordinate goal-x goal-y 0.0)
+              collect (make-coordinate goal-x (- goal-y) (* (/ pi 2) goal-y-sign)))))))
 
 (defun scan (area)
   "`area' is a list with 3d-vector of dimensions and pose-stamped.
