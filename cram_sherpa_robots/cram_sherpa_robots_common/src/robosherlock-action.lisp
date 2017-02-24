@@ -32,7 +32,7 @@
 (defparameter *robosherlock-action-name* "RoboSherlock/sherpa_color_object")
 (defparameter *robosherlock-action-type* "iai_robosherlock_msgs/HighlightObjectAction")
 
-(defparameter *robosherlock-action-timeout* 5
+(defparameter *robosherlock-action-timeout* 5000000000
   "How many seconds to wait before returning from the robosherlock action.")
 
 (defvar *robosherlock-action-client* nil)
@@ -74,20 +74,20 @@
                     "Calling CALL-ROBOSHERLOCK-ACTION with object ~a" object-name)
   (unless action-timeout
     (setf action-timeout *robosherlock-action-timeout*))
-  (multiple-value-bind (result status)
-      (cpl:with-failure-handling
-          ((simple-error (e)
-             (format t "Actionlib error occured!~%~a~%Reinitializing...~%~%" e)
-             (init-robosherlock-action-client)
-             (cpl:retry)))
-        (let ((actionlib:*action-server-timeout* 10.0))
-          (actionlib:call-goal
-           (get-robosherlock-action-client)
-           (robots-common:make-symbol-type-message
-            'iai_robosherlock_msgs-msg:HighlightObjectGoal
-            :obj_name object-name)
-           :timeout action-timeout)))
-    status))
+  (nth-value
+   1
+   (cpl:with-failure-handling
+       ((simple-error (e)
+          (format t "Actionlib error occured!~%~a~%Reinitializing...~%~%" e)
+          (init-robosherlock-action-client)
+          (cpl:retry)))
+     (let ((actionlib:*action-server-timeout* 10.0))
+       (actionlib:call-goal
+        (get-robosherlock-action-client)
+        (robots-common:make-symbol-type-message
+         'iai_robosherlock_msgs-msg:HighlightObjectGoal
+         :obj_name object-name)
+        :timeout action-timeout)))))
 
 
 
@@ -96,7 +96,9 @@
   (<- (motion-desig ?motion-designator (look-for ?object-name))
     (or (desig-prop ?motion-designator (:type :looking-for))
         (desig-prop ?motion-designator (:to :look-for)))
-    (desig-prop ?motion-designator (:object ?object-name)))
+    (desig-prop ?motion-designator (:object ?object-cram-name))
+    (lisp-fun cram-owl-name ?object-cram-name ?object-name))
+
   (<- (action-desig ?action-designator (look-for ?object-name))
     (or (desig-prop ?action-designator (:type :looking-for))
         (desig-prop ?action-designator (:to :look-for)))

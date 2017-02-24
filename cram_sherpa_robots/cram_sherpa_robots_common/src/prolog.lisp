@@ -35,7 +35,6 @@
 
   (<- (location-pose ?location ?pose)
     (-> (lisp-type ?location designator)
-        (and (desig-location-prop ?location ?location-prop)
-             (location-pose ?location-prop ?pose))
+        (desig-reference ?location ?pose)
         (or (cram-tf:pose ?pose ?location)
             (equal ?location ?pose)))))

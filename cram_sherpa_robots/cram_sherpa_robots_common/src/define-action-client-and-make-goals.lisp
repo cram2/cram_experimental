@@ -38,7 +38,7 @@
          (destroy-function-name (intern (format nil "DESTROY-~a-ACTION-CLIENT" name) package))
          (getter-function-name (intern (format nil "GET-~a-ACTION-CLIENT" name) package))
          (call-function-name (intern (format nil "CALL-~a-ACTION" name) package))
-         (ros-name (concatenate 'string (rosify_ agent-name) "/"
+         (ros-name (concatenate 'string (rosify agent-name) "/"
                                 (roslisp-utilities:rosify-lisp-name name))))
     `(progn
 
@@ -159,7 +159,7 @@
   (make-symbol-type-message
    'sherpa_msgs-msg:TakePictureGoal
    :picture_id (format nil "~a_~d"
-                       (rosify_ agent-name)
+                       (rosify agent-name)
                        (floor (* (roslisp:ros-time) 1000000)))))
 
 (defun make-toggle-actuator-goal (on?-otherwise-off)

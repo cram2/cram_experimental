@@ -36,12 +36,17 @@
    ;; action-designator-server
    #:main
    #:run-reference-server
-   #:perform-with-pms-running
    #:run-perform-server
    ;; action-json-parser
    #:*show-json-warnings*
    #:json-key-not-supported
    #:json-parser-failed
+   ;; cram-owl
+   #:*logging-enabled*
+   #:log-owl
+   #:cram-owl-name
+   #:owl-individual-of-class
+   #:owl-object-bounding-box
    ;; low-level-action-clients
    #:define-action-client
    #:make-mount-goal
@@ -62,5 +67,6 @@
    #:current-robot-symbol
    #:current-robot-package
    #:current-robot-name
-   #:rosify_
+   #:rosify
+   #:derosify
    #:make-symbol-type-message))

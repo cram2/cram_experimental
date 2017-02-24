@@ -29,22 +29,10 @@
 
 (in-package :robots-common)
 
-(defun main ()
-  (let ((agent-ros-name (rosify_ (current-robot-symbol))))
-    (let (perform-server-status-thread perform-server-callback-thread)
-      (unwind-protect
-           (progn
-             (roslisp-utilities:startup-ros :name agent-ros-name)
-             (run-reference-server agent-ros-name)
-             (multiple-value-setq
-                 (perform-server-status-thread perform-server-callback-thread)
-               (run-perform-server agent-ros-name))
-             (roslisp:spin-until nil 100))
-        (when (sb-thread:thread-alive-p perform-server-status-thread)
-          (sb-thread:terminate-thread perform-server-status-thread))
-        (when (sb-thread:thread-alive-p perform-server-callback-thread)
-          (sb-thread:terminate-thread perform-server-callback-thread))
-        (roslisp-utilities:shutdown-ros)))))
+(defgeneric main ()
+  (:method :before ()
+    (let ((agent-ros-name (rosify (current-robot-symbol))))
+      (roslisp-utilities:startup-ros :name agent-ros-name))))
 
 ;;;;;;;;;; referencing
 
@@ -62,67 +50,77 @@
 
 ;;;;;;;;;;;; performing
 
-(defgeneric perform-with-pms-running (designator)
-  (:documentation "Each robot should define this function with its corresponding PMs.")
-  (:method (designator)
-    (cpl:fail "PERFORM-WITH-PMS-RUNNING is not defined for this robot. Please do!")))
+(defvar *performing-threads* nil)
 
-(actionlib:def-exec-callback perform-server-callback (designator)
-  (roslisp:ros-info (robots-common perform-server) "Performing action designator ~a" designator)
+(defun stop-all-actions ()
+  (roslisp:ros-info (common performing) "stopping all ~a threads" (length *performing-threads*))
+  (maphash #'(lambda (tree-name task-tree)
+               (declare (ignore tree-name))
+               (when (and (cpl:task-tree-node-p task-tree)
+                          (cpl:task-tree-node-children task-tree))
+                (let* ((code (cpl:task-tree-node-effective-code
+                              (cdr (car (cpl:task-tree-node-children task-tree))))))
+                  (assert code () "Task tree node doesn't contain a CODE.")
+                  (assert (cpl:code-task code) () "Task tree code empty.")
+                  (format t "EVAPORATING CHILDREN~%")
+                  (cpl:evaporate (cpl:code-task code)))))
+           cpl-impl::*top-level-task-trees*)
+  (mapc (lambda (thread)
+          (when (sb-thread:thread-alive-p thread)
+            (sb-thread:terminate-thread thread)))
+        *performing-threads*)
+  (setf *performing-threads* nil))
+
+(def-fact-group robot-agnostic-desigs (desig:action-desig)
+  (<- (action-desig ?action-designator (stop-all-actions))
+    (or (desig-prop ?action-designator (:type :stoppping))
+        (desig-prop ?action-designator (:to :stop)))))
+
+(roslisp:def-service-callback sherpa_msgs-srv:PerformDesignator (designator)
+  (roslisp:ros-info (robots-common perform-server) "Referencing designator ~a" designator)
   (multiple-value-bind (success parsed-designator grounding)
       (try-reference-designator-json designator)
     (declare (ignore grounding))
-    (unless success
-      (actionlib:abort-current :result
+    (if success
+        (if (or (member :stop (desig:desig-prop-values parsed-designator :to))
+                (eq :stopping (desig:desig-prop-value parsed-designator :type)))
+            (progn
+             (stop-all-actions)
+             (roslisp:make-response :result (format nil "Stopping all actions.")))
+            (progn
+              ;; (when (some #'(lambda (process-module-name)
+              ;;                 (cpm::check-process-module-running process-module-name :throw-error nil))
+              ;;             (cpm:get-process-module-names))
+              ;;   (roslisp:ros-info (common perform-server) "Agent already has goals. Cancelling.")
+              ;;   (stop-all-actions)
+              ;;   (cpl:sleep 1) ; give one second to kill all threads
+              ;;   )
+              (let ((worker-thread nil)
+                    (result nil))
+                (setf worker-thread
+                      (sb-thread:make-thread
+                       (lambda ()
+                         (handler-case
+                             (progn
+                               (setf result (cpl-impl::named-top-level (:name red-wasp-tasks)
+                                              (perform parsed-designator))))
+                           (condition (error-object)
+                             (format t "CONDITION: ~a~%" error-object)
+                             (setf result error-object)))
+                         (format t "finished with result : ~a~%~%" result))))
+                (push worker-thread *performing-threads*)
+                (roslisp:make-response :result
+                                       (format nil "Performing designator ~a."
+                                               parsed-designator)))))
+        (roslisp:make-response :result
                                (format nil
                                        "Designator ~a could not be referenced."
-                                       designator)))
-    (let ((worker-thread nil)
-          (result nil))
-      (unwind-protect
-           (progn
-             (setf worker-thread
-                   (sb-thread:make-thread
-                    (lambda ()
-                      (handler-case
-                          (setf result (perform-with-pms-running parsed-designator))
-                        ;; (cpl:plan-failure (error-object)
-                        ;;   (roslisp:ros-error (robots-common reference-server)
-                        ;;                      "Could not perform designator ~a: ~a"
-                        ;;                      parsed-designator error-object)
-                        ;;   (setf result error-object))
-                        (condition (error-object)
-                          (setf result error-object))))))
-             (roslisp:loop-at-most-every 0.1
-               (when (actionlib:cancel-request-received)
-                 (actionlib:abort-current))
-               (unless (sb-thread:thread-alive-p worker-thread)
-                 (typecase result
-                   (condition
-                    (actionlib:abort-current :result (format nil "Could not perform designator ~a: ~a"
-                                                             parsed-designator result)))
-                   (t (when (eq (roslisp:node-status) :RUNNING) ; in case one pressed Ctrl-C-C
-                        (actionlib:succeed-current :result (format nil "~a" result))))))))
-        (when (and worker-thread (sb-thread:thread-alive-p worker-thread))
-          (maphash #'(lambda (tree-name task-tree)
-                       (declare (ignore tree-name))
-                       (let* ((code (cpl:task-tree-node-effective-code
-                                     (cdr (car (cpl:task-tree-node-children task-tree))))))
-                         (assert code () "Task tree node doesn't contain a CODE.")
-                         (assert (cpl:code-task code) () "Task tree code empty.")
-                         (cpl:evaporate (cpl:code-task code))))
-                   cpl-impl::*top-level-task-trees*)
-          (sb-thread:terminate-thread worker-thread))))))
+                                       parsed-designator)))))
 
 (defun run-perform-server (agent-namespace)
-  (multiple-value-bind
-        (perform-server-status-thread perform-server-callback-thread)
-      (actionlib:start-action-server
-       (concatenate 'string
-                    agent-namespace
-                    "/perform_designator")
-       "sherpa_msgs/PerformDesignatorAction"
-       #'perform-server-callback
-       :separate-thread t)
-    (roslisp:ros-info (robots-common perform-server) "Ready to perform designators.")
-    (values perform-server-status-thread perform-server-callback-thread)))
+  (roslisp:register-service
+   (concatenate 'string
+                agent-namespace
+                "/perform_designator")
+   'sherpa_msgs-srv:PerformDesignator)
+  (roslisp:ros-info (robots-common perform-server) "Ready to perform designators."))

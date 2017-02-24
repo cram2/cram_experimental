@@ -36,7 +36,6 @@
     (run-perform-server "blue_wasp")
     (roslisp:spin-until nil 100)))
 
-
 (defparameter *pub-transmit* nil)
 (defun ensure-transmit-pub ()
   (unless *pub-transmit*

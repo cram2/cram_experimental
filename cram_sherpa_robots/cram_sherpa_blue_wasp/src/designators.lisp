@@ -48,4 +48,10 @@
 
   (<- (desig:action-desig ?action-designator (take-picture))
     (or (desig:desig-prop ?action-designator (:type :taking-picture))
-        (desig:desig-prop ?action-designator (:to :take-picture)))))
+        (desig:desig-prop ?action-designator (:to :take-picture))))
+
+  (<- (desig:action-desig ?action-designator (sherpa-search ?object ?area))
+    (or (desig:desig-prop ?action-designator (:type :searching))
+        (desig:desig-prop ?action-designator (:to :search)))
+    (desig:desig-prop ?action-designator (:area ?area))
+    (desig:desig-prop ?action-designator (:object ?object))))
