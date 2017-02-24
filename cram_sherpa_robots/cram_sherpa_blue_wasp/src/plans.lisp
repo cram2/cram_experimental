@@ -29,6 +29,16 @@
 
 (in-package :blue-wasp)
 
+(defparameter *pub-transmit* nil)
+(defun ensure-transmit-pub ()
+  (unless *pub-transmit*
+    (setf *pub-transmit* (roslisp:advertise "blue_wasp/image_transmited" "std_msgs/bool"))
+    (roslisp:wait-duration 1))
+  *pub-transmit*)
+(defun clear-transmit-pub ()
+  (setf *pub-transmit* nil))
+(roslisp-utilities:register-ros-cleanup-function clear-transmit-pub)
+
 (defmethod perform-with-pms-running ((designator desig:designator))
   (cpm:with-process-modules-running
       (blue-wasp-sensors
@@ -42,5 +52,30 @@
 ;;   (find-victim)
 ;;   (land-or-whatever))
 
+(defun can-send ()
+  (let* ((query-string (format nil "action_feasible_on_robot(knowrob:'SendingAHighResPicture', [an, action, [type, sending_a_high_res_picture]], knowrob:'SherpaWaspBlue_ILQN')."))
+         (query-result (cut:force-ll (json-prolog:prolog-simple query-string))))
+    query-result))
+
+(defun move-closer ()
+  (let* ((wasp-tran (cl-tf:lookup-transform cram-tf:*transformer* "map" "blue_wasp/base_link"))
+         (donkey-tran (cl-tf:lookup-transform cram-tf:*transformer* "map" "donkey/base_link"))
+         (target-pose (cl-transforms-stamped:make-pose-stamped
+                        (cl-transforms-stamped:frame-id wasp-tran)
+                        0
+                        (cl-transforms-stamped:v*
+                          (cl-transforms-stamped:v+ (cl-transforms-stamped:translation wasp-tran) (cl-transforms-stamped:translation donkey-tran))
+                          0.5)
+                        (cl-transforms-stamped:euler->quaternion)))
+    (perform (desig:an action (to fly) (destination (desig:a location (pose target-pose)))))))
+
+(defun transmit-image ()
+  (roslisp:publish (ensure-transmit-pub) (roslisp:make-message "std_msgs/bool")))
+
 (defun take-picture ()
-  (perform (desig:a motion (to take-picture))))
+  (perform (desig:a motion (to take-picture)))
+  (loop until (can-send) do
+    (progn
+      (move-closer)))
+  (transmit-image))
+
