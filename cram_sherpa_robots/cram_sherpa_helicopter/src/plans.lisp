@@ -53,7 +53,7 @@
   (declare (type (or null cl-transforms-stamped:pose-stamped) ?pose))
   (format t "land ~a~%" ?pose)
   (when ?pose
-    (perform (a motion (to fly) (to ?pose))))
+    (perform (an action (to go) (to ?pose))))
   (perform (a motion (to set-altitude) (to 0)))
   (perform (a motion (to switch) (device engine) (state off))))
 

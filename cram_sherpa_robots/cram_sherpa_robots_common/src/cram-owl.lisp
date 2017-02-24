@@ -464,7 +464,12 @@
   (log-owl-action :set-altitude designator :start-time start-time :agent agent))
 
 (defmethod log-owl-action ((type (eql :mount)) designator &key start-time agent)
-  (let ((cram-agent-to-mount (desig:desig-prop-value designator :agent)))
+  (let* ((designator-agent (desig:desig-prop-value designator :agent))
+         (cram-agent-to-mount (typecase designator-agent
+                                (string (derosify designator-agent))
+                                (keyword designator-agent)
+                                (symbol (intern (symbol-name :key) :keyword))
+                                (t nil))))
     (call-logging-action
      (loggable-action
       type start-time NIL T agent
@@ -475,7 +480,12 @@
   (log-owl-action :mount designator :start-time start-time :agent agent))
 
 (defmethod log-owl-action ((type (eql :unmount)) designator &key start-time agent)
-  (let ((cram-agent-to-mount (desig:desig-prop-value designator :agent)))
+  (let* ((designator-agent (desig:desig-prop-value designator :agent))
+         (cram-agent-to-mount (typecase designator-agent
+                                (string (derosify designator-agent))
+                                (keyword designator-agent)
+                                (symbol (intern (symbol-name :key) :keyword))
+                                (t nil))))
     (call-logging-action
      (loggable-action
       type start-time NIL T agent
