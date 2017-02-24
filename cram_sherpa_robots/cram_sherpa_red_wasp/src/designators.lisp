@@ -41,6 +41,10 @@
              (equal ?on-or-off NIL)))))
 
 (def-fact-group red-wasp-actions (desig:action-desig)
+  (<- (desig:action-desig ?action-designator (look-for ?object-name))
+    (or (desig:desig-prop ?action-designator (:type :looking-for))
+        (desig:desig-prop ?action-designator (:to :look-for)))
+    (desig:desig-prop ?action-designator (:object ?object-name)))
 
   (<- (desig:action-desig ?action-designator (beacon-search ?object ?area))
     (or (desig:desig-prop ?action-designator (:type :searching))

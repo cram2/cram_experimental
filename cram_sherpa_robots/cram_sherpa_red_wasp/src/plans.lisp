@@ -38,44 +38,73 @@
     (run-perform-server "red_wasp")
     (roslisp:spin-until nil 100)))
 
-(defun beacon-search (?object ?area &optional (velocity-gain 5.0))
-  (format t "beacon search for ~a at ~a~%" ?object ?area)
+(defun look-for (object &optional (velocity-gain 5.0))
   ;; turn beacon on
-  (perform (desig:a motion (to switch) (device beacon) (state on)))
   (perform (desig:an action (to take-off)))
-  ;; scan area until beacon starts publishing
-  (cpl:pursue
-    (cpl:wait-for *beacon-msg-fluent*)
-    (perform (desig:an action (to scan) (area ?area))))
-  ;; fly towards signal
-  (let ((reached-fluent (cpl:<
-                         (cpl:fl-funcall #'(lambda (beacon-msg)
-                                             (roslisp:msg-slot-value
-                                              beacon-msg 'sherpa_msgs-msg:beacon_value))
-                                         *beacon-msg-fluent*)
-                         *beacon-distance-threashold*)))
-    (cpl:pursue
-      (cpl:wait-for reached-fluent)
-      (loop
-        (when (cpl:value *beacon-msg-fluent*)
+  (perform (desig:a motion (to switch) (device beacon) (state on)))
+  (when (cpl:value *beacon-msg-fluent*)
+    (let ((reached-fluent (cpl:<
+                           (cpl:fl-funcall #'(lambda (beacon-msg)
+                                               (roslisp:msg-slot-value
+                                                beacon-msg 'sherpa_msgs-msg:beacon_value))
+                                           *beacon-msg-fluent*)
+                           *beacon-distance-threashold*)))
+      (cpl:pursue
+        (cpl:wait-for reached-fluent)
+        (loop
           (let* ((beacon-transform (cl-transforms-stamped:lookup-transform
                                     cram-tf:*transformer*
                                     cram-tf:*fixed-frame*
                                     "red_wasp/base_link"
                                     :time 0.0
                                     :timeout cram-tf:*tf-default-timeout*))
+                 (direction-vector (roslisp:with-fields (x y z)
+                                       (roslisp:msg-slot-value
+                                        (cpl:value *beacon-msg-fluent*)
+                                        'sherpa_msgs-msg:direction)
+                                     (cl-transforms:make-3d-vector x y z)))
                  (?goal-pose (cl-transforms:make-pose
                               (cl-transforms:v+ (cl-transforms:translation beacon-transform)
-                                                (cl-transforms:v*
-                                                 (roslisp:with-fields (x y z)
-                                                     (roslisp:msg-slot-value
-                                                      (cpl:value *beacon-msg-fluent*)
-                                                      'sherpa_msgs-msg:direction)
-                                                   (cl-transforms:make-3d-vector x y z))
-                                                 velocity-gain))
+                                                (cl-transforms:v* direction-vector velocity-gain))
                               (cl-transforms:make-identity-rotation))))
             (call-fly-action :action-goal (cram-sherpa-robots-common:make-move-to-goal ?goal-pose))
             ;; (perform (desig:a motion (to fly) (to ?goal-pose)))
-            ))))
-    (helicopter:say (format nil "Red Wasp FOUND ~a." ?object))))
+            )))
+      (helicopter:say (format nil "Red Wasp FOUND ~a." object))
+      (let* ((beacon-value (roslisp:msg-slot-value
+                            (cpl:value *beacon-msg-fluent*)
+                            'sherpa_msgs-msg:beacon_value))
+             (beacon-transform (cl-transforms-stamped:lookup-transform
+                                cram-tf:*transformer*
+                                cram-tf:*fixed-frame*
+                                "red_wasp/base_link"
+                                :time 0.0
+                                :timeout cram-tf:*tf-default-timeout*))
+             (direction-vector (roslisp:with-fields (x y z)
+                                   (roslisp:msg-slot-value
+                                    (cpl:value *beacon-msg-fluent*)
+                                    'sherpa_msgs-msg:direction)
+                                 (cl-transforms:make-3d-vector x y z)))
+             (estimated-object-pose-stamped
+               (cl-transforms-stamped:make-pose-stamped
+                cram-tf:*fixed-frame*
+                (roslisp:ros-time)
+                (cl-transforms:v+ (cl-transforms:translation beacon-transform)
+                                  (cl-transforms:v* direction-vector beacon-value))
+                (cl-transforms:make-identity-rotation))))
+        (cram-occasions-events:on-event (make-instance 'robots-common:object-found
+                                          :object object :pose estimated-object-pose-stamped))))))
+
+
+(defun beacon-search (?object ?area)
+  (format t "beacon search for ~a at ~a~%" ?object ?area)
+  ;; turn beacon on
+  (perform (desig:an action (to take-off)))
+  (perform (desig:a motion (to switch) (device beacon) (state on)))
+  ;; scan area until beacon starts publishing
+  (cpl:pursue
+    (cpl:wait-for *beacon-msg-fluent*)
+    (perform (desig:an action (to scan) (area ?area))))
+  ;; fly towards signal
+  (perform (desig:an action (to look-for) (object ?object))))
 
