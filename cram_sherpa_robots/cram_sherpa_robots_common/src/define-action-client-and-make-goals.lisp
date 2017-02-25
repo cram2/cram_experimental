@@ -156,11 +156,13 @@
 
 (defun make-take-picture-goal (agent-name)
   (declare (type symbol agent-name))
-  (make-symbol-type-message
-   'sherpa_msgs-msg:TakePictureGoal
-   :picture_id (format nil "~a_~d"
-                       (rosify agent-name)
-                       (floor (* (roslisp:ros-time) 1000000)))))
+  (let ((picture-file-name (format nil "~a_~d"
+                                   (rosify agent-name)
+                                   (floor (* (roslisp:ros-time) 1000000)))))
+    (setf *link-to-image-file* picture-file-name)
+    (make-symbol-type-message
+     'sherpa_msgs-msg:TakePictureGoal
+     :picture_id picture-file-name)))
 
 (defun make-toggle-actuator-goal (on?-otherwise-off)
   (declare (type boolean on?-otherwise-off))

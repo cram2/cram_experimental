@@ -65,7 +65,7 @@
      (:file "location-of" :depends-on ("package" "belief-state"))
      (:file "action-json-parser" :depends-on ("package"))
      (:file "action-designator-server" :depends-on ("package" "action-json-parser" "utils"))
-     (:file "define-action-client-and-make-goals" :depends-on ("package" "utils"))
+     (:file "define-action-client-and-make-goals" :depends-on ("package" "utils" "cram-owl"))
      (:file "robosherlock-action" :depends-on ("package" "plan-library" "utils"
                                                          "cram-owl" ; for mapping cram to RS names
                                                          "belief-state"))))))

@@ -75,6 +75,8 @@
 
 (defparameter *logging-namespace-default* "knowrob")
 
+(defparameter *link-to-image-file* "")
+
 (defgeneric log-owl (object &key &allow-other-keys)
   (:documentation "call logging action on `object'")
   (:method ((object null) &key &allow-other-keys)
@@ -531,7 +533,7 @@
       (loggable-image-type)
       (vector (loggable-property-with-resource :|captureTime| (loggable-timepoint end-time))
               (loggable-property-with-value :|rosTopic| (namespaced :xsd "string") "RoboSherlock/output_image")
-              (loggable-property-with-value :|linkToImageFile| (namespaced :xsd "string") ""))))))
+              (loggable-property-with-value :|linkToImageFile| (namespaced :xsd "string") *link-to-image-file*))))))
 
 (defmethod log-owl-action ((type (eql :taking-picture)) designator &key start-time agent)
   (log-owl-action :take-picture designator :start-time start-time :agent agent))
