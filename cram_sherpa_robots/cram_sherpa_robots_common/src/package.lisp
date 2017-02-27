@@ -74,4 +74,6 @@
    #:current-robot-name
    #:rosify
    #:derosify
-   #:make-symbol-type-message))
+   #:make-symbol-type-message
+   ;; location-of
+   #:get-object-pose))
