@@ -35,7 +35,7 @@
 ;;           toggle_beacon    ToggleActuatorAction
 
 (define-action-client red-wasp fly "sherpa_msgs/MoveToAction" 1000)
-(define-action-client red-wasp set-altitude "sherpa_msgs/SetAltitudeAction" 5)
+(define-action-client red-wasp set-altitude "sherpa_msgs/SetAltitudeAction" 1000)
 (define-action-client red-wasp toggle-engine "sherpa_msgs/ToggleActuatorAction" 5)
 (define-action-client red-wasp toggle-beacon "sherpa_msgs/ToggleActuatorAction" 5)
 

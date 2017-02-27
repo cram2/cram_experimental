@@ -52,7 +52,9 @@
     ((:file "package")
      (:file "low-level" :depends-on ("package"))
      (:file "designators" :depends-on ("package"))
-     (:file "bullet-utils" :depends-on ("package"))
+     ;; (:file "bullet-utils" :depends-on ("package"))
      (:file "process-modules" :depends-on ("package" "designators"))
-     (:file "projection" :depends-on ("package" "designators" "bullet-utils"))
-     (:file "plans" :depends-on ("package" "projection" "process-modules"))))))
+     ;; (:file "projection" :depends-on ("package" "designators" "bullet-utils"))
+     (:file "plans" :depends-on ("package" ;"projection"
+                                 "process-modules"
+                                 ))))))

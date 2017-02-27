@@ -91,6 +91,7 @@
 (defvar *logging-action-client* nil)
 
 (defun init-logging-action-client ()
+  (format t "Init logging action~%")
   (setf *logging-action-client*
         (actionlib:make-action-client *logging-action-name* *logging-action-type*))
   (loop until (actionlib:wait-for-server *logging-action-client* 5.0)
@@ -132,8 +133,10 @@
             (init-logging-action-client)
             (cpl:retry)))
        (let ((actionlib:*action-server-timeout* 10.0))
-         (actionlib:call-goal
-          (get-logging-action-client) action-goal :timeout action-timeout))))))
+         (prog1
+             (actionlib:call-goal
+              (get-logging-action-client) action-goal :timeout action-timeout)
+           (roslisp:ros-info (common logging) "logging returned")))))))
 
 (defun make-property-msg (name &key resource type value)
   (declare (type string name)

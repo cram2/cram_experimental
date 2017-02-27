@@ -29,10 +29,12 @@
 
 (in-package :donkey)
 
-(defmethod main ()
+(defun main ()
+  (roslisp-utilities:startup-ros)
+  (roslisp:wait-duration 5.0)
   (cpm:with-process-modules-running
       (donkey-navigation donkey-manipulation)
-    (run-reference-server "donkey")
+    ;; (run-reference-server "donkey")
     (run-perform-server "donkey")
     (roslisp:spin-until nil 100)))
 

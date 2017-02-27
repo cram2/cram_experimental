@@ -29,10 +29,12 @@
 
 (in-package :hawk)
 
-(defmethod main ()
+(defun main ()
+  (roslisp-utilities:startup-ros)
+  (roslisp:wait-duration 5.0)
   (cpm:with-process-modules-running
       (hawk-sensors helicopter:helicopter-actuators robosherlock-pm)
-    (run-reference-server "hawk")
+    ;; (run-reference-server "hawk")
     (run-perform-server "hawk")
     (roslisp:spin-until nil 100)))
 

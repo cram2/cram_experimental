@@ -51,7 +51,8 @@
                cram-json-prolog ; for logging
                cram-utilities ; for json-prolog var-value
                cram-location-costmap
-               cram-sherpa-spatial-relations)
+               cram-sherpa-spatial-relations
+               )
 
   :components
   ((:module "src"

@@ -31,10 +31,12 @@
 
 (defparameter *beacon-distance-threashold* 25.0 "in meters when to consider found.")
 
-(defmethod main ()
+(defun main ()
+  (roslisp-utilities:startup-ros)
   (cpm:with-process-modules-running
       (red-wasp-sensors helicopter:helicopter-actuators)
-    (run-reference-server "red_wasp")
+    (roslisp:wait-duration 5.0)
+    ;; (run-reference-server "red_wasp")
     (run-perform-server "red_wasp")
     (roslisp:spin-until nil 100)))
 
@@ -42,6 +44,7 @@
   ;; turn beacon on
   (perform (desig:an action (to take-off)))
   (perform (desig:a motion (to switch) (device beacon) (state on)))
+  (format t "beacon signal found~%")
   (if (cpl:value *beacon-msg-fluent*)
       (let ((reached-fluent (cpl:<
                              (cpl:fl-funcall #'(lambda (beacon-msg)
@@ -49,6 +52,7 @@
                                                   beacon-msg 'sherpa_msgs-msg:beacon_value))
                                              *beacon-msg-fluent*)
                              *beacon-distance-threashold*)))
+        (format t "reached-fluent: ~a~%" (cpl:value reached-fluent))
         (cpl:pursue
           (cpl:wait-for reached-fluent)
           (loop
@@ -68,6 +72,7 @@
                                                   (cl-transforms:v* direction-vector velocity-gain))
                                 (cl-transforms:make-identity-rotation))))
               (call-fly-action :action-goal (cram-sherpa-robots-common:make-move-to-goal ?goal-pose))
+              (format t "approached~%")
               ;; (perform (desig:a motion (to fly) (to ?goal-pose)))
               )))
         (helicopter:say (format nil "Red Wasp FOUND ~a." object))

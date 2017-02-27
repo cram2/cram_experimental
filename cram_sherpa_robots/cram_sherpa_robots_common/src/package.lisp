@@ -34,7 +34,7 @@
   (:use #:common-lisp #:cram-designators #:cram-process-modules #:cram-prolog)
   (:export
    ;; action-designator-server
-   #:main
+   ;; #:main
    #:run-reference-server
    #:run-perform-server
    ;; action-json-parser

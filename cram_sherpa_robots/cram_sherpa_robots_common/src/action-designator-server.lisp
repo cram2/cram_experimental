@@ -29,10 +29,10 @@
 
 (in-package :robots-common)
 
-(defgeneric main ()
-  (:method :before ()
-    (let ((agent-ros-name (rosify (current-robot-symbol))))
-      (roslisp-utilities:startup-ros :name agent-ros-name))))
+;; (defgeneric main ()
+;;   (:method :before ()
+;;     (let ((agent-ros-name (rosify (current-robot-symbol))))
+;;       (roslisp-utilities:startup-ros :name agent-ros-name))))
 
 ;;;;;;;;;; referencing
 

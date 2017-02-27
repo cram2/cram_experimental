@@ -29,10 +29,13 @@
 
 (in-package :blue-wasp)
 
-(defmethod main ()
+(defun main ()
+  (let ((agent-ros-name (rosify (current-robot-symbol))))
+    (roslisp-utilities:startup-ros :name agent-ros-name))
+  (roslisp:wait-duration 5.0)
   (cpm:with-process-modules-running
       (blue-wasp-sensors helicopter:helicopter-actuators robosherlock-pm)
-    (run-reference-server "blue_wasp")
+    ;; (run-reference-server "blue_wasp")
     (run-perform-server "blue_wasp")
     (roslisp:spin-until nil 100)))
 

@@ -54,7 +54,7 @@
   (format t "land ~a~%" ?pose)
   (when ?pose
     (perform (an action (to go) (to ?pose))))
-  (perform (a motion (to set-altitude) (to 0)))
+  (perform (a motion (to set-altitude) (to 1.5)))
   (perform (a motion (to switch) (device engine) (state off))))
 
 (defun take-off (?altitude)
