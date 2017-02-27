@@ -47,7 +47,8 @@
 (roslisp-utilities:register-ros-cleanup-function clear-transmit-pub)
 
 (defun can-send ()
-  (let* ((query-string (format nil "action_feasible_on_robot(knowrob:'SendingAHighResPicture', [an, action, [type, sending_a_high_res_picture]], knowrob:'SherpaWaspBlue_ILQN')."))
+  (let* (;;(query-string (format nil "action_feasible_on_robot(knowrob:'SendingAHighResPicture', [an, action, [type, sending_a_high_res_picture]], knowrob:'SherpaWaspBlue_ILQN')."))
+         (query-string (format nil "action_feasible_on_robot(knowrob:'SendingAHighResPicture', knowrob:'SherpaWaspBlue_ILQN')."))
          (query-result (cut:force-ll (json-prolog:prolog-simple query-string))))
     query-result))
 
