@@ -37,6 +37,7 @@
                cram-robot-interfaces
                cram-sherpa-robots-common
                roslisp ; for add_lisp_executable
+               cram-language
                )
 
   :components
