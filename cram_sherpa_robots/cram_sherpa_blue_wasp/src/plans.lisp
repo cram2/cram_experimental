@@ -39,8 +39,59 @@
     (run-perform-server "blue_wasp")
     (roslisp:spin-until nil 100)))
 
+(defparameter *pub-transmit* nil)
+
+(defun ensure-transmit-pub ()
+  (unless *pub-transmit*
+    (setf *pub-transmit*
+          (roslisp:advertise "blue_wasp/image_transmitted" "std_msgs/Bool"))
+    (roslisp:wait-duration 1))
+  *pub-transmit*)
+
+(defun clear-transmit-pub ()
+  (setf *pub-transmit* nil))
+
+(roslisp-utilities:register-ros-cleanup-function clear-transmit-pub)
+
+(defun can-send ()
+  (let* ((object-individual-string
+           (robots-common:loggable-robot-individual-name :blue-wasp))
+         (query-string (format nil
+                               "action_feasible_on_robot(knowrob:'SendingAHighResPicture', '~a')."
+                               object-individual-string)))
+    (json-prolog:prolog-simple query-string)))
+
+(defun move-closer ()
+  (let* ((wasp-tran (cl-transforms-stamped:lookup-transform
+                     cram-tf:*transformer*
+                     cram-tf:*fixed-frame*
+                     "blue_wasp/base_link"))
+         (donkey-tran (cl-transforms-stamped:lookup-transform
+                       cram-tf:*transformer*
+                       cram-tf:*fixed-frame*
+                       "donkey/base_link"))
+         (?target-pose (cl-transforms-stamped:make-pose-stamped
+                        (cl-transforms-stamped:frame-id wasp-tran)
+                        0
+                        (cl-transforms-stamped:v*
+                         (cl-transforms-stamped:v-
+                          (cl-transforms-stamped:translation donkey-tran)
+                          (cl-transforms-stamped:translation wasp-tran))
+                         0.5)
+                        (cl-transforms-stamped:make-identity-rotation))))
+    (perform (desig:an action (to fly) (destination (desig:a location (pose ?target-pose)))))))
+
+(defun transmit-image ()
+  (roslisp:publish
+   (ensure-transmit-pub)
+   (roslisp:make-message "std_msgs/bool")))
+
 (defun take-picture ()
-  (perform (desig:a motion (to take-picture))))
+  (perform (desig:a motion (to take-picture)))
+  ;; (loop until (can-send) do
+  ;;   (move-closer))
+  ;; (transmit-image)
+  )
 
 (defun look-for (?object-name)
   (perform (desig:an action (to take-picture)))

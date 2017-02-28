@@ -38,7 +38,7 @@
                cram-sherpa-robots-common
                roslisp ; for add_lisp_executable
                cram-language
-               )
+               cram-json-prolog)
 
   :components
   ((:module "src"
