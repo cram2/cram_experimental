@@ -117,7 +117,10 @@ current_object_pose(Obj, Obj_pose).")
                                :package :robots-common))
          (pose-list (cut:var-value '?pose (cut:lazy-car query-result-bindings))))
     (unless (cut:is-var pose-list)
-      (flat-list-w-first->pose pose-list)))
+      (cl-transforms-stamped:pose->pose-stamped
+       cram-tf:*fixed-frame*
+       (roslisp:ros-time)
+       (flat-list-w-first->pose pose-list))))
   ;; (gethash object-name *found-objects*)
   )
 

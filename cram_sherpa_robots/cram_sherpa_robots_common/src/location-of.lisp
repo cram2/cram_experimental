@@ -30,22 +30,23 @@
 (in-package :robots-common)
 
 (defun get-object-pose (object-name)
-  (let* ((tf-frame (if (string-equal object-name "victim")
-                       "victim"
-                       (if (string-equal object-name "kite")
-                           "hang_glider"
-                           (concatenate 'string object-name "/base_link"))))
-         (object-transform (cl-transforms-stamped:lookup-transform
-                            cram-tf:*transformer*
-                            cram-tf:*fixed-frame*
-                            tf-frame
-                            :time 0.0
-                            :timeout cram-tf:*tf-default-timeout*)))
-    (cl-transforms-stamped:make-pose-stamped
-     cram-tf:*fixed-frame*
-     (cl-transforms-stamped:stamp object-transform)
-     (cl-transforms-stamped:translation object-transform)
-     (cl-transforms-stamped:rotation object-transform)));; (case object-name
+  (if (string-equal object-name "victim")
+      (get-found-object-pose :victim)
+      (if (string-equal object-name "kite")
+          (get-found-object-pose :kite)
+          (let* ((tf-frame (concatenate 'string object-name "/base_link"))
+                 (object-transform (cl-transforms-stamped:lookup-transform
+                                    cram-tf:*transformer*
+                                    cram-tf:*fixed-frame*
+                                    tf-frame
+                                    :time 0.0
+                                    :timeout cram-tf:*tf-default-timeout*)))
+            (cl-transforms-stamped:make-pose-stamped
+             cram-tf:*fixed-frame*
+             (cl-transforms-stamped:stamp object-transform)
+             (cl-transforms-stamped:translation object-transform)
+             (cl-transforms-stamped:rotation object-transform)))))
+  ;; (case object-name
   ;; (get-found-object-pose object-name))
   )
 
