@@ -49,6 +49,7 @@
    #:owl-object-bounding-box
    #:loggable-robot-individual-name
    #:namespaced
+   #:get-flight-altitude
    ;; low-level-action-clients
    #:define-action-client
    #:make-mount-goal

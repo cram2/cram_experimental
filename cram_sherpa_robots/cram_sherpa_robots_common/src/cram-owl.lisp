@@ -75,7 +75,9 @@
 
 (defparameter *logging-namespace-default* "knowrob")
 
+
 (defparameter *link-to-image-file* "")
+
 
 (defgeneric log-owl (object &key &allow-other-keys)
   (:documentation "call logging action on `object'")
@@ -176,7 +178,7 @@
 
 (defun loggable-timepoint (&optional time)
   (declare (type (or null double-float) time))
-  (format nil "timepoint_~,3f" (or time (roslisp:ros-time))))
+  (namespaced :knowrob (format nil "timepoint_~,3f" (or time (roslisp:ros-time)))))
 
 (defun loggable-location-name ()
   (namespaced :log (unique-id-ed "location")))
@@ -343,7 +345,7 @@
                                              (y cl-transforms:y)
                                              (z cl-transforms:z))
                                     (cl-transforms:origin pose)
-                                  (format nil "~a ~a ~a" x y z))))
+                                  (format nil "~,2f ~,2f ~,2f" x y z))))
 
 (defmethod loggable-property ((name (eql :|quaternion|)) &key pose)
   (declare (type cl-transforms:pose pose))
@@ -354,8 +356,20 @@
                                              (z cl-transforms:z)
                                              (w cl-transforms:w))
                                     (cl-transforms:orientation pose)
-                                  (format nil "~a ~a ~a ~a" w x y z))))
+                                  (format nil "~,2f ~,2f ~,2f ~,2f" w x y z))))
 
+(defun get-flight-altitude (cram-robot-name)
+  (let* ((robot-owl-name (loggable-robot-individual-name cram-robot-name))
+         (owl-flight-altitude (cut:var-value
+                               '?altitude
+                               (car
+                                (json-prolog:prolog
+                                 `("rdf_has" ,robot-owl-name
+                                             ,(namespaced :knowrob "nominalFlightAltitude")
+                                             ?altitude)
+                                 :package :robots-common)))))
+    (unless (cut:is-var owl-flight-altitude)
+      (read-from-string (string-trim "'" (symbol-name (car (cddadr owl-flight-altitude))))))))
 
 (defmethod log-owl ((pose cl-transforms:pose) &key name-with-id)
   (call-logging-action
@@ -445,8 +459,9 @@
   (log-owl-action :land designator :start-time start-time :agent agent))
 
 (defmethod log-owl-action ((type (eql :take-off)) designator &key start-time agent)
-  (let ((altitude (or (car (remove :take-off (desig:desig-prop-values designator :to)))
-                      (desig:desig-prop-value designator :altitude))))
+  (let* ((altitude-prop (or (car (remove :take-off (desig:desig-prop-values designator :to)))
+                            (desig:desig-prop-value designator :altitude)))
+         (altitude (or altitude-prop (get-flight-altitude agent))))
     (call-logging-action
      (loggable-action
       type start-time NIL T agent
@@ -457,8 +472,9 @@
   (log-owl-action :take-off designator :start-time start-time :agent agent))
 
 (defmethod log-owl-action ((type (eql :set-altitude)) designator &key start-time agent)
-  (let ((altitude (or (car (remove :set-altitude (desig:desig-prop-values designator :to)))
-                      (desig:desig-prop-value designator :value))))
+  (let* ((altitude-prop (or (car (remove :set-altitude (desig:desig-prop-values designator :to)))
+                            (desig:desig-prop-value designator :value)))
+         (altitude (or altitude-prop (get-flight-altitude agent))))
     (call-logging-action
      (loggable-action
       type start-time NIL T agent

@@ -96,7 +96,7 @@ current_object_pose(Obj, Obj_pose).")
   (let* ((pose-prolog-string
            (apply #'format nil
                   "[a, pose, [~,2f,~,2f,~,2f],[~,2f,~,2f,~,2f,~,2f]]"
-                  (cram-sherpa-robots-common::pose-to-flat-list-w-first object-pose)))
+                  (cram-sherpa-robots-common::pose->flat-list-w-first object-pose)))
          (object-individual-string
            (owl-individual-of-class
             (namespaced :knowrob (cram-owl-name object-name))))

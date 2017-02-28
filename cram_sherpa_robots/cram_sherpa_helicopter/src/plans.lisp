@@ -29,25 +29,9 @@
 
 (in-package :helicopter)
 
-(defparameter *navigation-default-altitude* 20 "In meters.")
-
-(defun get-flight-altitude ()
-  (let* ((robot-owl-name (robots-common:loggable-robot-individual-name
-                          (robots-common:current-robot-symbol)))
-         (owl-flight-altitude (cut:var-value
-                               '?altitude
-                               (car
-                                (json-prolog:prolog
-                                 `("rdf_has" ,robot-owl-name
-                                             ,(robots-common:namespaced :knowrob
-                                                                        "nominalFlightAltitude")
-                                             ?altitude)
-                                 :package :helicopter)))))
-    (if (cut:is-var owl-flight-altitude)
-        *navigation-default-altitude*
-        (read-from-string (string-trim "'" (symbol-name (car (cddadr owl-flight-altitude))))))))
-
 ;;; Might as well use def-cram-function-s but they're not as convenient
+
+(defparameter *navigation-default-altitude* 20 "In meters.")
 
 (defun land (?pose)
   (declare (type (or null cl-transforms-stamped:pose-stamped) ?pose))
@@ -62,7 +46,8 @@
   (format t "take-off ~a~%" ?altitude)
   (perform (a motion (to switch) (device engine) (state on)))
   (unless ?altitude
-    (setf ?altitude (get-flight-altitude)))
+    (setf ?altitude (or (robots-common:get-flight-altitude (current-robot-symbol))
+                        *navigation-default-altitude*)))
   (perform (a motion (to set-altitude) (to ?altitude))))
 
 (defun calculate-area-via-points (area delta)
@@ -106,7 +91,8 @@ E.g. (#<3D-VECTOR (d w h)> #<POSE-STAMPED ('frame' stamp (x y z) (q1 q2 q3 w))>)
 E.g. (#<3D-VECTOR (d w h)> #<POSE-STAMPED ('frame' stamp (x y z) (q1 q2 q3 w))>)"
   (declare (type list area))
   (format t "scan ~a~%" area)
-  (let ((?altitude (get-flight-altitude)))
+  (let ((?altitude (or (get-flight-altitude (current-robot-symbol))
+                       *navigation-default-altitude*)))
     (perform (an action (to take-off) (to ?altitude)))
     (mapc (lambda (?goal)
           (perform (a motion (to fly) (to ?goal))))
@@ -114,6 +100,7 @@ E.g. (#<3D-VECTOR (d w h)> #<POSE-STAMPED ('frame' stamp (x y z) (q1 q2 q3 w))>)
 
 (defun navigate (?location)
   (format t "go ~a~%" ?location)
-  (let ((?altitude (get-flight-altitude)))
+  (let ((?altitude (or (get-flight-altitude (current-robot-symbol))
+                       *navigation-default-altitude*)))
     (perform (an action (to take-off) (to ?altitude))))
   (perform (a motion (to fly) (to ?location))))
