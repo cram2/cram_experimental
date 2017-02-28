@@ -62,7 +62,7 @@
      (:file "utils" :depends-on ("package"))
      (:file "cram-owl" :depends-on ("package" "utils"))
      (:file "plan-library" :depends-on ("package" "cram-owl"))
-     (:file "belief-state" :depends-on ("package"))
+     (:file "belief-state" :depends-on ("package" "cram-owl"))
      (:file "location-of" :depends-on ("package" "belief-state"))
      (:file "reachable-for-donkey" :depends-on ("package" "location-of"))
      (:file "action-json-parser" :depends-on ("package"))
