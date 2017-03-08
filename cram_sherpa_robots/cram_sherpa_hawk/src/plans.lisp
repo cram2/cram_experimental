@@ -48,8 +48,11 @@
 (defun sherpa-search (?object ?area)
   (format t "search for ~a at ~a~%" ?object ?area)
   (cpl:pursue
-    (cpl:seq
+    (progn ; if scan action finishes first, means look-for didn't finish so no object
       (perform (desig:an action (to scan) (area ?area)))
+      (helicopter:say (format nil "Hawk could not find ~a." ?object)))
+    (progn ; if look-for finished first, we found victim before scanning was over
+      (perform (desig:an action (to look-for) (object ?object)))
       (helicopter:say (format nil "Hawk FOUND ~a." ?object))
-      (perform (desig:an action (to take-picture))))
-    (perform (desig:an action (to look-for) (object ?object)))))
+      ;; (perform (desig:an action (to take-picture)))
+      )))

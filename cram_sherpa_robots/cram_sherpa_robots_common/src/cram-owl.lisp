@@ -29,7 +29,7 @@
 
 (in-package :robots-common)
 
-(defparameter *logging-enabled* t)
+(defparameter *logging-enabled* nil)
 
 (defparameter *unique-id-length* 14
   "How many characters to append to create unique IDs for OWL individuals")
@@ -65,6 +65,7 @@
     (:set-altitude "ChangingAircraftAltitude" :knowrob :log)
     (:land "Landing-Aircraft" :knowrob :log)
     (:scan "ScanningArea" :knowrob :log)
+    (:search "SearchArea" :knowrob :log)
     (:switch "TogglingDeviceState" :knowrob :log)
     (:drive "Driving" :knowrob :log)
     (:mount "InstallingHardwareComponent" :srdl2-action :log)
@@ -525,6 +526,20 @@
 
 (defmethod log-owl-action ((type (eql :scanning)) designator &key start-time agent)
   (log-owl-action :scan designator :start-time start-time :agent agent))
+
+(defmethod log-owl-action ((type (eql :search)) designator &key start-time agent)
+  (let ((owl-area (desig:desig-prop-value designator :area))
+        (object (desig:desig-prop-value designator :object)))
+    (call-logging-action
+     (loggable-action
+      type start-time NIL T agent
+      (loggable-property-with-resource :|objectActedOn| owl-area)
+      (loggable-property-with-resource :|target| (if (keywordp object)
+                                                     (cram-owl-name object :class)
+                                                     object))))))
+
+(defmethod log-owl-action ((type (eql :searching)) designator &key start-time agent)
+  (log-owl-action :search designator :start-time start-time :agent agent))
 
 (defmethod log-owl-action ((type (eql :look-for)) designator &key start-time agent)
   (let ((object (desig:desig-prop-value designator :object)))

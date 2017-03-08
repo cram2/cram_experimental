@@ -55,9 +55,10 @@
 
 (defun can-send ()
   (let* ((object-individual-string
-           (robots-common:loggable-robot-individual-name :blue-wasp))
+           ;; (robots-common:loggable-robot-individual-name :blue-wasp)
+           "/blue_wasp/base_link")
          (query-string (format nil
-                               "action_feasible_on_robot(knowrob:'SendingAHighResPicture', '~a')."
+                               "comp_networkQuality('~a', _Q)."
                                object-individual-string)))
     (json-prolog:prolog-simple query-string)))
 
@@ -74,12 +75,12 @@
                         (cl-transforms-stamped:frame-id wasp-tran)
                         0
                         (cl-transforms-stamped:v*
-                         (cl-transforms-stamped:v-
+                         (cl-transforms-stamped:v+
                           (cl-transforms-stamped:translation donkey-tran)
                           (cl-transforms-stamped:translation wasp-tran))
                          0.5)
                         (cl-transforms-stamped:make-identity-rotation))))
-    (perform (desig:an action (to fly) (destination (desig:a location (pose ?target-pose)))))))
+    (perform (desig:a motion (to fly) (to (desig:a location (pose ?target-pose)))))))
 
 (defun transmit-image ()
   (roslisp:publish
@@ -88,9 +89,9 @@
 
 (defun take-picture ()
   (perform (desig:a motion (to take-picture)))
-  ;; (loop until (can-send) do
-  ;;   (move-closer))
-  ;; (transmit-image)
+  (loop until (can-send) do
+    (move-closer))
+  (transmit-image)
   )
 
 (defun look-for (?object-name)
