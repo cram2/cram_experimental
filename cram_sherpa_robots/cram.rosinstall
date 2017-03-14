@@ -1,0 +1,25 @@
+# ROSINSTALL FOR INSTALLING CRAM AND HMI COMPONENTS
+
+######################### related stuff, incomment when needed #########
+# - git: {local-name: sherpa_world, uri: 'https://github.com/sherpa-eu/sherpa_world.git'}
+# - git: {local-name: UE_ROS_Bridge, uri: 'https://github.com/sherpa-eu/UE_ROS_Bridge.git'}
+# - git: {local-name: sherpa_msgs, uri: 'https://github.com/sherpa-eu/sherpa_msgs.git'}
+
+#################### CRAM core packages ######################
+- git: {local-name: roslisp, uri: 'https://github.com/sherpa-eu/roslisp.git'}
+- git: {local-name: roslisp_common, uri: 'https://github.com/sherpa-eu/roslisp_common.git'}
+- git: {local-name: cram_3rdparty, uri: 'https://github.com/sherpa-eu/cram_3rdparty.git'}
+- git: {local-name: cram_core, uri: 'https://github.com/sherpa-eu/cram_core.git'}
+- git: {local-name: cram_plans, uri: 'https://github.com/sherpa-eu/cram_plans.git'}
+- git: {local-name: cram_json_prolog, uri: 'https://github.com/sherpa-eu/cram_json_prolog.git'}
+- git: {local-name: cram_semantic_maps, uri: 'https://github.com/sherpa-eu/cram_semantic_maps.git'}
+
+#################### CRAM Sherpa packages ######################
+- git: {local-name: cram_sherpa_robots, uri: 'https://github.com/sherpa-eu/cram_sherpa_robots.git'}
+# - git: {local-name: cram_sherpa_sandbox, uri: 'https://github.com/sherpa-eu/cram_sherpa_sandbox.git'}
+- git: {local-name: cram_commander, uri: 'https://github.com/sherpa-eu/cram_commander.git'}
+
+#################### HMI-related packages ######################
+- git: {local-name: cram_sherpa_reasoning, uri: 'https://github.com/sherpa-eu/cram_sherpa_reasoning.git'}
+# - git: {local-name: hmi_cram, uri: 'https://github.com/sherpa-eu/hmi_cram.git'}
+# - git: {local-name: hmi_interpreter, uri: 'https://github.com/sherpa-eu/hmi_interpreter.git'}
