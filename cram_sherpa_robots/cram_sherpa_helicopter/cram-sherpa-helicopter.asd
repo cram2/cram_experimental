@@ -41,8 +41,8 @@
                cram-sherpa-robots-common
                roslisp
                roslisp-utilities
-               cram-bullet-reasoning
-               cram-bullet-reasoning-utilities
+               ;; cram-bullet-reasoning
+               ;; cram-bullet-reasoning-utilities
                std_msgs-msg ; for publishing on display_command topic
                )
 
