@@ -41,22 +41,29 @@
              (equal ?on-or-off NIL))))
 
   (<- (desig:motion-desig ?motion-designator (take-picture NIL))
-    (or (desig:desig-prop ?motion-designator (:type :taking-picture))
-        (desig:desig-prop ?motion-designator (:to :take-picture)))))
+      (or (desig:desig-prop ?motion-designator (:type :taking-picture))
+	  (desig:desig-prop ?motion-designator (:to :take-picture)))))
 
 (def-fact-group blue-wasp-actions (desig:action-desig)
 
+  (<- (desig:action-desig ?action-designator (sherpa-take-picture ?object-name))
+      (or (desig:desig-prop ?action-designator (:destination ?location))
+	  (desig:desig-prop ?action-designator (:to ?location)))
+      (or (desig:desig-prop ?action-designator (:type :taking-picture))
+	  (desig:desig-prop ?action-designator (:to :take-picture)))
+      (desig:desig-prop ?location (:of ?object-name)))
+
   (<- (desig:action-desig ?action-designator (take-picture))
-    (or (desig:desig-prop ?action-designator (:type :taking-picture))
-        (desig:desig-prop ?action-designator (:to :take-picture))))
+      (or (desig:desig-prop ?action-designator (:type :taking-picture))
+	  (desig:desig-prop ?action-designator (:to :take-picture))))
 
   (<- (desig:action-desig ?action-designator (look-for ?object-name))
-    (or (desig:desig-prop ?action-designator (:type :looking-for))
-        (desig:desig-prop ?action-designator (:to :look-for)))
-    (desig:desig-prop ?action-designator (:object ?object-name)))
-
+      (or (desig:desig-prop ?action-designator (:type :looking-for))
+	  (desig:desig-prop ?action-designator (:to :look-for)))
+      (desig:desig-prop ?action-designator (:object ?object-name)))
+  
   (<- (desig:action-desig ?action-designator (sherpa-search ?object ?area))
-    (or (desig:desig-prop ?action-designator (:type :searching))
-        (desig:desig-prop ?action-designator (:to :search)))
-    (desig:desig-prop ?action-designator (:area ?area))
-    (desig:desig-prop ?action-designator (:object ?object))))
+      (or (desig:desig-prop ?action-designator (:type :searching))
+	  (desig:desig-prop ?action-designator (:to :search)))
+      (desig:desig-prop ?action-designator (:area ?area))
+      (desig:desig-prop ?action-designator (:object ?object))))

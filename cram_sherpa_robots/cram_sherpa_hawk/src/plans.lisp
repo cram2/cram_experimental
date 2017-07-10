@@ -56,3 +56,7 @@
       (helicopter:say (format nil "Hawk FOUND ~a." ?object))
       ;; (perform (desig:an action (to take-picture)))
       )))
+
+(defun sherpa-take-picture (?object-name)
+  (perform (desig:a motion (to fly) (to (desig:a location (of ?object-name)))))
+  (perform (desig:an action (to take-picture))))
