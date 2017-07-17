@@ -108,3 +108,9 @@
       (perform (desig:an action (to look-for) (object ?object)))
       (helicopter:say (format nil "Blue Wasp FOUND ~a." ?object))
       (perform (desig:an action (to take-picture))))))
+
+(defun sherpa-take-picture (?object-name)
+  (progn 
+    (perform (desig:a motion (to fly) (to (desig:a location (of ?object-name)))))
+    (perform (desig:an action (to take-picture)))))
+
